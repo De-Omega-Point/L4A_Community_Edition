@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title">
+  <title id="title">Loyalty for All</title>
+  <rect width="512" height="512" rx="116" fill="#176b43"/>
+  <path d="M128 142h76v164c0 35 20 57 57 57 36 0 58-22 58-57V142h76v169c0 79-51 132-134 132-82 0-133-53-133-132V142z" fill="#fff"/>
+  <circle cx="256" cy="105" r="38" fill="#8ce3b5"/>
+</svg>

@@ -1,0 +1,11 @@
+{
+  "name": "loyalty-for-all-community",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Loyalty for All Community Edition — Free Forever",
+  "scripts": {
+    "test": "node --test test/*.test.mjs && node scripts/check-app.mjs",
+    "test:e2e": "node scripts/e2e.cjs"
+  }
+}
