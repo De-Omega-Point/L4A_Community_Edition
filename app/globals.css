@@ -1,0 +1,25 @@
+:root {
+  --background: #f5f9f6;
+  --foreground: #1a2421;
+}
+
+body {
+  margin: 0;
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+}
+
+.launch-redirect {
+  min-height: 100vh;
+  display: grid;
+  place-content: center;
+  gap: 0.75rem;
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.launch-redirect a {
+  color: #059669;
+  font-weight: 700;
+}

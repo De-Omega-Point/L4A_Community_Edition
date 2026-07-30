@@ -1,0 +1,503 @@
+<!doctype html>
+<html lang="en-AU">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#10b981" />
+  <meta name="description" content="Loyalty-4-All Community Edition — a free, local-first loyalty-first CRM for small businesses." />
+  <meta name="application-name" content="Loyalty-4-All" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="Loyalty-4-All" />
+  <title>Loyalty-4-All — Community Edition</title>
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" href="assets/icon-192.png" type="image/png" sizes="192x192" />
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <section id="registrationGate" class="registration-gate" aria-labelledby="registrationTitle">
+    <div class="registration-panel">
+      <img class="registration-brand-logo" src="assets/loyalty-4-all-logo.png" alt="Loyalty-4-All" />
+      <p class="eyebrow">Community Edition</p>
+      <h1 id="registrationTitle">Get Loyalty-4-All — Free Forever</h1>
+      <p class="lede">A simple digital loyalty system for your business. No credit card. No compulsory subscription.</p>
+
+      <form id="registrationForm">
+        <label for="registrationBusinessName">Business name <span aria-hidden="true">*</span></label>
+        <input id="registrationBusinessName" name="businessName" autocomplete="organization" required />
+
+        <label for="registrationContactName">Your name <span aria-hidden="true">*</span></label>
+        <input id="registrationContactName" name="contactName" autocomplete="name" required />
+
+        <label for="registrationEmail">Email address <span aria-hidden="true">*</span></label>
+        <input id="registrationEmail" name="email" type="email" autocomplete="email" required />
+        <p class="field-help">Used to issue and recover your Product ID.</p>
+
+        <label for="registrationBusinessType">Business type <span class="muted">(optional)</span></label>
+        <select id="registrationBusinessType" name="businessType">
+          <option value="">Choose one</option>
+          <option>Café or food business</option>
+          <option>Retail</option>
+          <option>Hair or beauty</option>
+          <option>Health or fitness</option>
+          <option>Professional service</option>
+          <option>Other</option>
+        </select>
+
+        <label class="check-row">
+          <input id="registrationTerms" name="termsAccepted" type="checkbox" required />
+          <span>I agree to the <a href="terms.html" target="_blank" rel="noopener">Terms</a> and <a href="privacy.html" target="_blank" rel="noopener">Privacy Notice</a>. <span aria-hidden="true">*</span></span>
+        </label>
+
+        <label class="check-row">
+          <input id="registrationFeedback" name="feedbackConsent" type="checkbox" />
+          <span>You may occasionally contact me for feedback, surveys and useful product information. I can unsubscribe at any time.</span>
+        </label>
+
+        <button class="btn btn-large" type="submit">Get My Free Product ID</button>
+        <p id="registrationNotice" class="notice" role="status">Your customer records stay on this device.</p>
+      </form>
+    </div>
+  </section>
+
+  <div id="appShell" hidden>
+    <header>
+      <div class="container header-inner">
+        <div class="brand-row">
+          <img class="product-brand-logo" src="assets/loyalty-4-all-logo.png" alt="Loyalty-4-All" />
+          <img id="brandLogoPreview" alt="" />
+          <div>
+            <div class="title-row">
+              <h1 id="brandTitle">Loyalty-4-All</h1>
+              <span class="edition-badge">Community Edition</span>
+            </div>
+            <div class="brand-attribution">Loyalty-first CRM · De-Omega-Point Project</div>
+          </div>
+        </div>
+        <div class="product-chip">
+          <span>Product ID</span>
+          <strong id="headerProductId">—</strong>
+        </div>
+        <nav id="mainNav" aria-label="Main navigation"></nav>
+      </div>
+    </header>
+
+    <main class="container">
+      <section id="screen-counter" class="screen active">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Fast counter workflow</p>
+            <h2>Scan. Revisit. Reward.</h2>
+          </div>
+        </div>
+        <div class="grid">
+          <article class="card">
+            <h3>Find customer</h3>
+            <label for="scanInput">Scan QR or enter customer code</label>
+            <input id="scanInput" placeholder="e.g. CUST-7K4M9Q" autocomplete="off" />
+            <div class="actions">
+              <button class="btn" id="btnHandleScan">Find Customer</button>
+              <button class="btn secondary" id="btnCameraScan">Use Camera</button>
+              <button class="btn secondary" id="btnStopCameraScan">Stop Camera</button>
+            </div>
+            <div id="counterNotice" class="notice" role="status">Ready.</div>
+            <div id="cameraPanel" hidden>
+              <video id="cameraVideo" playsinline autoplay muted></video>
+              <div id="cameraNotice" class="notice tiny">Camera ready.</div>
+            </div>
+          </article>
+
+          <article class="card">
+            <h3>Current customer</h3>
+            <div id="currentCustomerSummary" class="empty-state">No customer selected.</div>
+            <div class="actions">
+              <button class="btn" id="btnCheckIn">Record Visit</button>
+              <button class="btn secondary" id="btnManualReward">Add Bonus Points</button>
+              <button class="btn secondary" id="btnRedeemReward">Redeem Reward</button>
+            </div>
+            <label for="counterNote">Optional note</label>
+            <textarea id="counterNote" placeholder="Add a short customer note"></textarea>
+            <div class="actions">
+              <button class="btn secondary" id="btnAddNote">Save Note</button>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section id="screen-dashboard" class="screen">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">At a glance</p>
+            <h2>Business dashboard</h2>
+          </div>
+        </div>
+        <div class="kpi-grid">
+          <article class="card"><h3>Customers</h3><div class="kpi" id="kpiCustomers">0</div></article>
+          <article class="card"><h3>Visits</h3><div class="kpi" id="kpiVisits">0</div></article>
+          <article class="card"><h3>Reward ready</h3><div class="kpi" id="kpiRewardReady">0</div></article>
+          <article class="card"><h3>Rewards redeemed</h3><div class="kpi" id="kpiRewardsRedeemed">0</div></article>
+        </div>
+        <div class="split spaced">
+          <article class="card"><h3>Top customers</h3><div id="topCustomers"></div></article>
+          <article class="card"><h3>Recent activity</h3><div id="recentActivity"></div></article>
+        </div>
+        <div class="spaced">
+          <article class="card"><h3>Helpful alerts</h3><div id="alertsPanel"></div></article>
+        </div>
+      </section>
+
+      <section id="screen-customers" class="screen">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Customer relationships</p>
+            <h2>Customer CRM</h2>
+          </div>
+        </div>
+        <div class="kpi-grid crm-kpi-grid">
+          <article class="card"><h3>Total customers</h3><div class="kpi" id="crmTotal">0</div></article>
+          <article class="card"><h3>Active</h3><div class="kpi" id="crmActive">0</div><p class="tiny muted">Visited within 30 days</p></article>
+          <article class="card"><h3>Follow-up</h3><div class="kpi crm-attention" id="crmFollowUp">0</div><p class="tiny muted">No visit for 45+ days</p></article>
+          <article class="card"><h3>VIP customers</h3><div class="kpi crm-vip" id="crmVip">0</div><p class="tiny muted">10 or more visits</p></article>
+        </div>
+        <article class="card crm-toolbar spaced">
+          <div>
+            <label for="crmSearch">Search customers</label>
+            <input id="crmSearch" placeholder="Name, code, email or phone" />
+          </div>
+          <div>
+            <label for="crmSegmentFilter">Show</label>
+            <select id="crmSegmentFilter">
+              <option value="all">All customers</option>
+              <option value="active">Active</option>
+              <option value="follow-up">Needs follow-up</option>
+              <option value="reward-ready">Reward ready</option>
+              <option value="vip">VIP customers</option>
+              <option value="contactable">Contact permission</option>
+            </select>
+          </div>
+        </article>
+        <div class="split">
+          <article class="card">
+            <h3>Add or edit customer</h3>
+            <label for="crmName">Name <span aria-hidden="true">*</span></label>
+            <input id="crmName" autocomplete="name" />
+            <label for="crmToken">Customer code</label>
+            <input id="crmToken" placeholder="Created automatically" />
+            <label for="crmEmail">Email <span class="muted">(optional)</span></label>
+            <input id="crmEmail" type="email" autocomplete="email" />
+            <label for="crmPhone">Phone <span class="muted">(optional)</span></label>
+            <input id="crmPhone" autocomplete="tel" />
+            <label class="check-row">
+              <input id="crmContactConsent" type="checkbox" />
+              <span>Customer has agreed to receive direct contact from this business.</span>
+            </label>
+            <div class="actions">
+              <button class="btn" id="btnSaveCustomer">Save Customer</button>
+              <button class="btn secondary" id="btnResetCustomer">Clear</button>
+              <button class="btn danger" id="btnDeleteCustomer">Delete</button>
+            </div>
+          </article>
+          <article class="card">
+            <h3>CRM customer list</h3>
+            <div id="crmList" class="table-wrap"></div>
+            <h3 class="spaced">Customer profile</h3>
+            <div id="crmProfile" class="empty-state">Select a customer to view their CRM profile.</div>
+            <h3 class="spaced">Relationship history</h3>
+            <div id="crmTimeline" class="empty-state">Select a customer to view their history.</div>
+          </article>
+        </div>
+      </section>
+
+      <section id="screen-cards" class="screen">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Customer membership</p>
+            <h2>Loyalty cards</h2>
+          </div>
+        </div>
+        <div class="split">
+          <article class="card">
+            <label for="cardCustomer">Customer</label>
+            <select id="cardCustomer"></select>
+            <div class="actions">
+              <button class="btn" id="btnRenderCard">Preview</button>
+              <button class="btn secondary" id="btnExportCardPng">Download PNG</button>
+              <button class="btn secondary" id="btnPrintCard">Print</button>
+              <button class="btn secondary" id="btnEmailCard">Email Code</button>
+              <button class="btn secondary" id="btnBatchPrintA4">Print A4 Sheet</button>
+            </div>
+          </article>
+          <article class="card">
+            <div id="cardPreview">
+              <div id="cardBrandName">Loyalty-4-All</div>
+              <div id="cardCustomerName">No customer selected</div>
+              <div class="small" id="cardCustomerProgress">0 visits · 0 points</div>
+              <canvas id="cardQrCanvas" width="132" height="132" aria-label="Customer QR code"></canvas>
+              <div class="small" id="cardCustomerToken">Customer code</div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section id="screen-settings" class="screen">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Simple controls</p>
+            <h2>Settings and data</h2>
+          </div>
+        </div>
+        <div class="split">
+          <article class="card">
+            <h3>Business</h3>
+            <label for="settingsBusinessName">Business name</label>
+            <input id="settingsBusinessName" />
+            <label for="settingsBrandColour">Brand colour</label>
+            <input id="settingsBrandColour" type="color" />
+            <label for="settingsBrandLogo">Logo image URL <span class="muted">(optional)</span></label>
+            <input id="settingsBrandLogo" />
+            <button class="btn spaced" id="btnSaveBranding">Save Branding</button>
+
+            <h3 class="spaced">Basic reward</h3>
+            <label for="settingsPointsPerVisit">Points per visit</label>
+            <input id="settingsPointsPerVisit" type="number" min="1" max="100" />
+            <label for="settingsRewardThreshold">Points needed</label>
+            <input id="settingsRewardThreshold" type="number" min="1" max="10000" />
+            <label for="settingsRewardName">Reward name</label>
+            <input id="settingsRewardName" placeholder="e.g. Free coffee" />
+            <button class="btn spaced" id="btnSaveRewards">Save Reward</button>
+          </article>
+
+          <article class="card">
+            <h3>Product registration</h3>
+            <dl class="details-list">
+              <div><dt>Edition</dt><dd>Community — Free Forever</dd></div>
+              <div><dt>Product ID</dt><dd id="settingsProductId">—</dd></div>
+              <div><dt>Registered business</dt><dd id="settingsRegisteredBusiness">—</dd></div>
+            </dl>
+
+            <h3 class="spaced">Backup</h3>
+            <p class="muted">Your records live in this browser. Download regular backups.</p>
+            <div class="actions">
+              <button class="btn" id="btnExportData">Download Backup</button>
+              <button class="btn secondary" id="btnExportCsv">Export Customers CSV</button>
+              <button class="btn secondary" id="btnImportData">Restore Backup</button>
+            </div>
+            <div id="dataNotice" class="notice tiny">No automatic cloud sync.</div>
+
+            <h3 class="spaced">Safe demonstration</h3>
+            <div class="actions">
+              <button class="btn secondary" id="btnLoadDemo">Load Demo Data</button>
+              <button class="btn secondary" id="btnClearDemo">Remove Demo Data</button>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section id="screen-upgrade" class="screen">
+        <div class="upgrade-hero">
+          <div>
+            <p class="eyebrow">Optional growth tools</p>
+            <h2>When loyalty starts working, make it work harder.</h2>
+            <p class="upgrade-lede">Community Edition stays free forever. Upgrade only when saving more time, bringing back more customers or managing a growing team becomes worth paying for.</p>
+          </div>
+          <div class="upgrade-proof">
+            <strong>Keep Community free</strong>
+            <span>No expiry · No forced upgrade · Your local data stays yours</span>
+          </div>
+        </div>
+
+        <div class="upgrade-benefits">
+          <article class="card upgrade-card">
+            <span class="upgrade-number">01</span>
+            <p class="eyebrow">Launch faster</p>
+            <h3>Guided Setup</h3>
+            <p>Start with the right reward, branding and customer workflow—without spending your weekend configuring software.</p>
+            <ul class="benefit-list">
+              <li>Done-with-you business setup</li>
+              <li>Reward strategy and card branding</li>
+              <li>Customer import and staff handover</li>
+            </ul>
+            <button class="btn secondary upgrade-interest" data-interest="guided-setup">I’d value setup help</button>
+          </article>
+
+          <article class="card upgrade-card featured">
+            <span class="upgrade-tag">Most useful for growth</span>
+            <span class="upgrade-number">02</span>
+            <p class="eyebrow">Bring customers back</p>
+            <h3>Growth Tools</h3>
+            <p>Turn customer activity into timely follow-ups, clearer decisions and less manual work.</p>
+            <ul class="benefit-list">
+              <li>Secure cloud backup and device sync</li>
+              <li>Automated birthday and win-back campaigns</li>
+              <li>Deeper retention and reward reporting</li>
+            </ul>
+            <button class="btn upgrade-interest" data-interest="growth-tools">I want growth tools</button>
+          </article>
+
+          <article class="card upgrade-card">
+            <span class="upgrade-number">03</span>
+            <p class="eyebrow">Grow the operation</p>
+            <h3>Teams & Locations</h3>
+            <p>Give staff the right access and see customer loyalty across more than one location.</p>
+            <ul class="benefit-list">
+              <li>Staff accounts and permissions</li>
+              <li>Multi-location customer view</li>
+              <li>Priority onboarding and support</li>
+            </ul>
+            <button class="btn secondary upgrade-interest" data-interest="teams-locations">I’m planning to scale</button>
+          </article>
+        </div>
+
+        <div class="pricing-heading">
+          <div>
+            <p class="eyebrow">Simple monthly pricing</p>
+            <h3>Pay only when the upgrade earns its place.</h3>
+          </div>
+          <span class="mock-badge">Mock checkout · No payment taken</span>
+        </div>
+
+        <div class="pricing-grid">
+          <article class="card price-card current-plan">
+            <p class="eyebrow">Your current plan</p>
+            <h3>Community</h3>
+            <div class="price"><span>A$</span>0<small>/forever</small></div>
+            <p>Core loyalty and local CRM for one independent business.</p>
+            <ul class="benefit-list">
+              <li>Customer loyalty cards and QR check-in</li>
+              <li>Local-first CRM and visit history</li>
+              <li>Rewards, backup and CSV export</li>
+            </ul>
+            <button class="btn secondary" disabled>Current plan</button>
+          </article>
+
+          <article class="card price-card">
+            <p class="eyebrow">Get established</p>
+            <h3>Starter</h3>
+            <div class="price"><span>A$</span>9<small>/month</small></div>
+            <p>For owners who want a smoother setup and secure continuity.</p>
+            <ul class="benefit-list">
+              <li>Everything in Community</li>
+              <li>Guided setup and customer import</li>
+              <li>Secure cloud backup</li>
+            </ul>
+            <button class="btn secondary mock-checkout" data-plan="Starter" data-price="9" data-interest="guided-setup">Choose Starter</button>
+          </article>
+
+          <article class="card price-card featured-price">
+            <span class="upgrade-tag">Best value</span>
+            <p class="eyebrow">Increase retention</p>
+            <h3>Pro</h3>
+            <div class="price"><span>A$</span>19<small>/month</small></div>
+            <p>For businesses ready to bring back more customers with less effort.</p>
+            <ul class="benefit-list">
+              <li>Everything in Starter</li>
+              <li>Win-back and birthday campaigns</li>
+              <li>Retention and reward analytics</li>
+            </ul>
+            <button class="btn mock-checkout" data-plan="Pro" data-price="19" data-interest="growth-tools">Choose Pro</button>
+          </article>
+
+          <article class="card price-card">
+            <p class="eyebrow">Scale the operation</p>
+            <h3>Business</h3>
+            <div class="price"><span>A$</span>39<small>/month</small></div>
+            <p>For growing teams that need control across staff and locations.</p>
+            <ul class="benefit-list">
+              <li>Everything in Pro</li>
+              <li>Staff roles and permissions</li>
+              <li>Multi-location view and priority support</li>
+            </ul>
+            <button class="btn secondary mock-checkout" data-plan="Business" data-price="39" data-interest="teams-locations">Choose Business</button>
+          </article>
+        </div>
+
+        <article class="upgrade-cta">
+          <div>
+            <p class="eyebrow">No sales chase</p>
+            <h3>Register interest in one tap.</h3>
+            <p>We’ll use your existing business registration to understand demand. This does not start a subscription or change your Community Edition.</p>
+          </div>
+          <div id="upgradeNotice" class="notice" role="status">Choose the benefit that would create the most value for your business.</div>
+        </article>
+      </section>
+
+      <section id="screen-help" class="screen">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">No training required</p>
+            <h2>Quick help</h2>
+          </div>
+        </div>
+        <div class="grid">
+          <article class="card">
+            <h3>Start in three steps</h3>
+            <ol class="steps">
+              <li>Add a customer.</li>
+              <li>Give them their QR loyalty card.</li>
+              <li>Scan the card and record each visit.</li>
+            </ol>
+          </article>
+          <article class="card">
+            <h3>Protect your records</h3>
+            <p>Customer information stays in this browser. Download a backup regularly and store it safely.</p>
+            <button class="btn secondary" id="btnHelpBackup">Download Backup</button>
+          </article>
+          <article class="card">
+            <h3>Share feedback</h3>
+            <p>Feedback is optional. We send only one scheduled survey after approximately eight weeks.</p>
+            <a class="btn secondary link-btn" id="feedbackLink" href="#" target="_blank" rel="noopener">Share Feedback</a>
+          </article>
+          <article class="card">
+            <h3>Community promise</h3>
+            <p>Free forever. No expiry. No compulsory subscription. No hidden customer-data upload.</p>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <footer class="container">
+      <span>Loyalty-4-All Community Edition · A De-Omega-Point Project</span>
+      <span>·</span>
+      <a href="privacy.html">Privacy</a>
+      <span>·</span>
+      <a href="terms.html">Terms</a>
+    </footer>
+  </div>
+
+  <dialog id="mockCheckoutDialog" class="checkout-dialog" aria-labelledby="checkoutTitle">
+    <form method="dialog" class="checkout-panel">
+      <div class="checkout-topline">
+        <span class="mock-badge">Checkout simulation</span>
+        <button class="dialog-close" value="cancel" aria-label="Close checkout">×</button>
+      </div>
+      <p class="eyebrow">Loyalty-4-All upgrade</p>
+      <h2 id="checkoutTitle">Review your plan</h2>
+      <div class="checkout-summary">
+        <div>
+          <span id="checkoutPlan">Pro</span>
+          <small>Monthly subscription</small>
+        </div>
+        <strong id="checkoutPrice">A$19/month</strong>
+      </div>
+      <dl class="details-list">
+        <div><dt>Business</dt><dd id="checkoutBusiness">Registered business</dd></div>
+        <div><dt>Product ID</dt><dd id="checkoutProductId">—</dd></div>
+        <div><dt>Due today</dt><dd>A$0.00</dd></div>
+      </dl>
+      <div class="mock-payment">
+        <strong>Mock payment</strong>
+        <span>No card details required. No subscription will be created.</span>
+      </div>
+      <button class="btn btn-large" id="btnConfirmMockCheckout" value="default">Confirm Mock Upgrade</button>
+      <button class="btn secondary btn-large checkout-cancel" value="cancel">Cancel</button>
+      <p id="checkoutNotice" class="notice tiny" role="status">This records upgrade interest only. It does not process a payment.</p>
+    </form>
+  </dialog>
+
+  <script src="js/vendor/qrcode.js"></script>
+  <script src="js/vendor/jsQR.js"></script>
+  <script src="config.js"></script>
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
