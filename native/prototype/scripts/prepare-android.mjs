@@ -11,6 +11,20 @@ import { fileURLToPath } from 'node:url';
 
 const prototypeRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const marker = '// L4A UNSIGNED-ONLY PROTOTYPE GUARD v1';
+// AGP's release symbol-processing tasks contain the word Debug, but are not
+// debug variants and never sign packages or generate signing credentials.
+export const releaseSymbolTasks = Object.freeze([
+  'stripUniversalReleaseDebugSymbols',
+  'extractUniversalReleaseNativeDebugMetadata',
+  'mergeUniversalReleaseNativeDebugMetadata'
+]);
+export function isAllowedUnsignedTask(name) {
+  const n = name.toLowerCase();
+  return (!n.includes('debug') || releaseSymbolTasks.includes(name)) &&
+    !n.includes('validatesigning') && !n.startsWith('sign') &&
+    !(n.includes('keystore') && (n.includes('create') || n.includes('generate'))) &&
+    !(n.includes('key') && n.includes('generate'));
+}
 export const guard = `
 ${marker}
 // No release key, debug key, signing operation, or debug build is authorized.
@@ -22,7 +36,8 @@ android {
 gradle.taskGraph.whenReady {
     allTasks.forEach { task ->
         val n = task.name.lowercase()
-        check(!n.contains("debug") &&
+        val releaseSymbolTasks = setOf(${releaseSymbolTasks.map(name => JSON.stringify(name)).join(', ')})
+        check((!n.contains("debug") || releaseSymbolTasks.contains(task.name)) &&
             !n.contains("validatesigning") &&
             !n.startsWith("sign") &&
             !(n.contains("keystore") && (n.contains("create") || n.contains("generate"))) &&
@@ -80,7 +95,14 @@ export function selfTest() {
   assert.throws(() => prepareGradle(''), /Unrecognized/);
   assert.match(prepared, /signingConfig = null/u);
   assert.match(prepared, /taskGraph.whenReady/u);
-  console.log('Unsigned Android guard: 10 self-test assertions passed.');
+  for (const name of [...releaseSymbolTasks, 'assembleUniversalRelease', 'compileUniversalReleaseKotlin']) {
+    assert.equal(isAllowedUnsignedTask(name), true, name);
+  }
+  for (const name of ['assembleUniversalDebug', 'validateSigningUniversalRelease', 'signUniversalReleaseBundle', 'generateReleaseKey', 'createDebugKeystore', 'stripUniversalDebugDebugSymbols', 'extractUniversalDebugNativeDebugMetadata', 'stripUniversalReleaseDebugSymbolsAndSign', 'mergeUniversalDebugNativeDebugMetadata']) {
+    assert.equal(isAllowedUnsignedTask(name), false, name);
+  }
+  assert.match(prepared, /releaseSymbolTasks.contains\(task.name\)/u);
+  console.log('Unsigned Android guard: 25 self-test assertions passed.');
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {

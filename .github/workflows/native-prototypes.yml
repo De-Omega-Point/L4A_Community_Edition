@@ -41,7 +41,7 @@ jobs:
       - name: Generate icons from existing Community image
         run: npm run tauri -- icon ../../public/community/assets/icon-512.png
       - name: Test navigation boundary
-        run: cargo test --manifest-path src-tauri/Cargo.toml --lib
+        run: cargo test --locked --manifest-path src-tauri/Cargo.toml --lib
       - name: Build unsigned native test package
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: 'false'

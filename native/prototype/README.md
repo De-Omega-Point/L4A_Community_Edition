@@ -1,8 +1,9 @@
 # Actual native build prototype — not a customer release
 
 Authorized no-cost build experiment, 1 November 2026. Tauri CLI 2.12.4, core
-2.12.5 and build 2.7.4 are pinned. npm lock is committed; each build exports its
-resolved Cargo.lock beside the binaries for exact dependency evidence. No web
+2.12.5 and build 2.7.4 are pinned. Both npm and Cargo locks are committed. The Cargo lock was independently
+identical in successful Mac and Windows builds; every build exports its lock
+beside the binaries for exact dependency evidence. No web
 source or registration backend is bundled, replaced or bypassed.
 
 The native executable starts on a bundled **TEST ONLY** explanation. Clicking
