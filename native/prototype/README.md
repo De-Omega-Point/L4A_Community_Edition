@@ -14,7 +14,7 @@ Community Edition remains free forever, with no expiry/timed trial.
 No native commands/plugins or remote capabilities. Navigation is restricted to
 the local landing and exact existing HTTPS host. Desktop new windows, file downloads
 and permissions (including camera) are denied. Tauri does not support the
-new-window callback on Android; Android popup behavior remains unverified and
+new-window callback on Android; Android popup/download behavior remains unverified and
 requires native-device acceptance before release. These restrictions intentionally
 mean backup/export/scanning and full native usability are NOT accepted yet.
 Offline cold start is not promised. The live browser/PWA remains unchanged.
