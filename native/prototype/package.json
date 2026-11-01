@@ -1,0 +1,13 @@
+{
+  "name": "l4a-community-native-prototype",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "tauri": "tauri",
+    "test": "node --test scripts/*.test.mjs && node scripts/prepare-android.mjs --self-test"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "2.12.4"
+  }
+}

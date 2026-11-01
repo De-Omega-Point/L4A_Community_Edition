@@ -1,0 +1,16 @@
+[package]
+name = "l4a-community-prototype"
+version = "0.1.0"
+description = "Loyalty4All Community Edition — test-only hosted-gate prototype"
+authors = ["De-Omega-Point"]
+edition = "2021"
+
+[lib]
+name = "l4a_community_prototype_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "=2.7.4", features = [] }
+
+[dependencies]
+tauri = { version = "=2.12.5", features = [] }
