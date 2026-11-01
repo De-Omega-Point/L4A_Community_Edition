@@ -8,18 +8,19 @@ const community = resolve(root, "public/community");
 const { crmStatus } = await import("../public/community/js/crm.js");
 const { appState } = await import("../public/community/js/state.js");
 
-test("includes the automatic CRM workspace", () => {
+test("keeps the customer workspace lean and useful", () => {
   const index = readFileSync(resolve(community, "index.html"), "utf8");
   const crm = readFileSync(resolve(community, "js/crm.js"), "utf8");
   const ui = readFileSync(resolve(community, "js/ui.js"), "utf8");
 
-  assert.match(index, /Customer CRM/);
-  assert.match(index, /crmSegmentFilter/);
-  assert.match(index, /crmFollowUp/);
-  assert.match(index, /crmProfile/);
-  assert.match(crm, /export function crmStatus/);
-  assert.match(crm, /No contact permission/);
-  assert.match(ui, /label: 'CRM'/);
+  assert.match(index, /id="screen-customers"/);
+  assert.match(index, /Name is the only required detail/);
+  assert.match(index, /Add contact details/);
+  assert.match(index, /id="cardQrCanvas"/);
+  assert.match(index, /Recent history/);
+  assert.match(crm, /That customer code already belongs/);
+  assert.match(crm, /contactConsent/);
+  assert.match(ui, /\{ id: 'customers', label: 'Customers' \}/);
 });
 
 test("CRM status is derived without extra customer inputs", () => {

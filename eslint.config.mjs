@@ -13,6 +13,13 @@ const eslintConfig = defineConfig([
     "build/**",
     "next-env.d.ts",
     "public/community/js/vendor/**",
+    "android/**",
+    "ios/**",
+    "native-web/**",
+    "capacitor.config.ts",
+    "docs/archive/**",
+    ".sites-runtime/**",
+    ".wrangler/**",
   ]),
 ]);
 

@@ -2,502 +2,568 @@
 <html lang="en-AU">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="theme-color" content="#10b981" />
-  <meta name="description" content="Loyalty-4-All Community Edition — a free, local-first loyalty-first CRM for small businesses." />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#07865f" />
+  <meta name="description" content="Loyalty-4-All Community Edition — free, local-first loyalty for independent businesses." />
   <meta name="application-name" content="Loyalty-4-All" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="Loyalty-4-All" />
   <title>Loyalty-4-All — Community Edition</title>
-  <link rel="manifest" href="manifest.webmanifest" />
+  <!-- The manifest is registration-protected, so its request must include the same-origin receipt cookie. -->
+  <link rel="manifest" href="manifest.webmanifest" crossorigin="use-credentials" />
   <link rel="icon" href="assets/icon-192.png" type="image/png" sizes="192x192" />
   <link rel="apple-touch-icon" href="assets/apple-touch-icon.png" />
   <link rel="stylesheet" href="css/styles.css" />
 </head>
 <body>
-  <section id="registrationGate" class="registration-gate" aria-labelledby="registrationTitle">
-    <div class="registration-panel">
-      <img class="registration-brand-logo" src="assets/loyalty-4-all-logo.png" alt="Loyalty-4-All" />
-      <p class="eyebrow">Community Edition</p>
-      <h1 id="registrationTitle">Get Loyalty-4-All — Free Forever</h1>
-      <p class="lede">A simple digital loyalty system for your business. No credit card. No compulsory subscription.</p>
-
-      <form id="registrationForm">
-        <label for="registrationBusinessName">Business name <span aria-hidden="true">*</span></label>
-        <input id="registrationBusinessName" name="businessName" autocomplete="organization" required />
-
-        <label for="registrationContactName">Your name <span aria-hidden="true">*</span></label>
-        <input id="registrationContactName" name="contactName" autocomplete="name" required />
-
-        <label for="registrationEmail">Email address <span aria-hidden="true">*</span></label>
-        <input id="registrationEmail" name="email" type="email" autocomplete="email" required />
-        <p class="field-help">Used to issue and recover your Product ID.</p>
-
-        <label for="registrationBusinessType">Business type <span class="muted">(optional)</span></label>
-        <select id="registrationBusinessType" name="businessType">
-          <option value="">Choose one</option>
-          <option>Café or food business</option>
-          <option>Retail</option>
-          <option>Hair or beauty</option>
-          <option>Health or fitness</option>
-          <option>Professional service</option>
-          <option>Other</option>
-        </select>
-
-        <label class="check-row">
-          <input id="registrationTerms" name="termsAccepted" type="checkbox" required />
-          <span>I agree to the <a href="terms.html" target="_blank" rel="noopener">Terms</a> and <a href="privacy.html" target="_blank" rel="noopener">Privacy Notice</a>. <span aria-hidden="true">*</span></span>
-        </label>
-
-        <label class="check-row">
-          <input id="registrationFeedback" name="feedbackConsent" type="checkbox" />
-          <span>You may occasionally contact me for feedback, surveys and useful product information. I can unsubscribe at any time.</span>
-        </label>
-
-        <button class="btn btn-large" type="submit">Get My Free Product ID</button>
-        <p id="registrationNotice" class="notice" role="status">Your customer records stay on this device.</p>
-      </form>
-    </div>
-  </section>
-
-  <div id="appShell" hidden>
-    <header>
+  <div id="appShell">
+    <header class="app-header">
       <div class="container header-inner">
         <div class="brand-row">
-          <img class="product-brand-logo" src="assets/loyalty-4-all-logo.png" alt="Loyalty-4-All" />
-          <img id="brandLogoPreview" alt="" />
-          <div>
-            <div class="title-row">
-              <h1 id="brandTitle">Loyalty-4-All</h1>
-              <span class="edition-badge">Community Edition</span>
+          <a class="product-lockup" href="./" aria-label="Loyalty-4-All Community Edition home">
+            <img class="product-brand-logo" src="assets/loyalty-4-all-logo.png" alt="Loyalty-4-All" />
+            <span class="product-brand-copy">
+              <strong>Loyalty4All</strong>
+              <small>Community Edition</small>
+            </span>
+          </a>
+          <span class="co-brand-divider" aria-hidden="true"></span>
+          <div class="merchant-lockup">
+            <div class="merchant-logo-shell" aria-hidden="true">
+              <img id="brandLogoPreview" alt="" />
+              <span id="brandLogoFallback">MB</span>
             </div>
-            <div class="brand-attribution">Loyalty-first CRM · De-Omega-Point Project</div>
+            <div class="brand-copy">
+              <span class="merchant-label">Your shop</span>
+              <h1 id="brandTitle">My Business</h1>
+              <div class="trust-row" aria-label="Edition and storage status">
+                <span class="edition-badge">Community · Free forever</span>
+                <span class="local-badge"><span aria-hidden="true">●</span> Local-first</span>
+              </div>
+            </div>
           </div>
         </div>
-        <div class="product-chip">
-          <span>Product ID</span>
-          <strong id="headerProductId">—</strong>
-        </div>
-        <nav id="mainNav" aria-label="Main navigation"></nav>
+        <nav id="mainNav" aria-label="Main navigation" hidden></nav>
       </div>
     </header>
 
-    <main class="container">
+    <aside id="installBanner" class="install-banner" aria-labelledby="installBannerTitle">
+      <div class="container install-banner-inner">
+        <img src="assets/icon-192.png" alt="" />
+        <div>
+          <strong id="installBannerTitle">Keep Loyalty-4-All within easy reach</strong>
+          <span id="installHint">Install the free app on this device. Your local records stay here.</span>
+        </div>
+        <button class="btn compact" id="btnInstallApp" type="button">Install app</button>
+        <button class="install-dismiss" id="btnDismissInstall" type="button" aria-label="Dismiss install suggestion">×</button>
+      </div>
+    </aside>
+
+    <section id="installFirst" class="container" aria-labelledby="installFirstTitle" style="padding-block:28px">
+      <article class="card">
+        <p class="eyebrow">Loyalty4All · Register → Install → Open → Use</p>
+        <h2 id="installFirstTitle" tabindex="-1">Install the app — recommended</h2>
+        <p id="installFirstMessage">Open the app from its installed icon to confirm registration on this device.</p>
+        <ol><li>Install this free web app—not an App Store download.</li><li>Open the Loyalty4All icon on your device.</li><li>Stay online for the first registration and offline-file checks.</li></ol>
+        <p id="installActionStatus" role="status" aria-live="polite"></p>
+        <p id="setupInstallSummary">Choose installation instructions for your device.</p><ol id="setupInstallSteps"><li>Use Installation help to select your device or browser.</li></ol><p class="tiny">Detection is a local hint, not a guarantee. Installation and registration are checked separately. Changing browsers does not transfer your local customer records or necessarily your registration receipt.</p>
+        <div class="actions stacked-mobile"><button class="btn" id="btnInstallFirst" type="button">Installation help</button><button class="btn secondary" id="btnConfirmSetup" type="button">Check this app again</button></div>
+        <p>Installation is recommended. If it is not an option, you can use this browser after reviewing the risks.</p><button class="btn secondary" id="btnBrowserFallback" type="button" aria-haspopup="dialog" aria-controls="browserRiskDialog">Continue in browser</button>
+        <p id="setupStorageWarning" class="notice error" role="alert" hidden></p>
+        <p id="offlineReadiness" role="status">Offline readiness has not been confirmed.</p>
+        <button class="btn secondary" id="btnUsePreparedWorkspace" type="button" hidden>Continue with prepared local workspace — registration unverified</button>
+        <a id="installedRegistrationLink" href="/community/register" hidden>Registration in this app</a>
+        <p>Already have records? Before moving to another browser or the installed app, download and check a backup from each workspace that holds records. Restore it using Settings &amp; backup after registration is confirmed in the destination. Installation does not transfer or sync customer records. Installed apps also need regular backups.</p>
+        <div class="actions stacked-mobile"><button class="btn secondary" id="btnSetupBackup" type="button">Download existing backup</button><button class="btn secondary" id="btnLegacyWorkspace" type="button" hidden>Export existing customer CSV</button></div>
+        <button class="btn secondary spaced" id="btnSetupUninstall" type="button" aria-haspopup="dialog" aria-controls="uninstallDialog">Uninstall app</button>
+        <p class="tiny">Your existing records remain on this device. A backup restores records, not registration. Need help? <a href="mailto:Hello@De-Omega-Point.Com">Hello@De-Omega-Point.Com</a></p>
+      </article>
+    </section>
+    <main class="container" id="customerTools" hidden inert>
+      <p id="installedUseStatus" tabindex="-1" class="notice tiny" role="status"></p>
+      <section id="screen-members" class="screen" aria-labelledby="memberDashboardTitle">
+        <div class="section-heading"><div>
+          <p class="eyebrow">Your local community</p>
+          <h2 id="memberDashboardTitle">Active member dashboard</h2>
+          <p>See who is coming back, then welcome them at the counter.</p>
+        </div></div>
+        <p id="memberWindow" class="notice">Active means a recorded visit 0–30 whole days ago, matching the customer activity status. This is visit activity, not paid membership.</p>
+        <div id="memberTotals" class="member-totals" aria-label="Local member totals"></div>
+        <article class="card spaced">
+          <h3>Showing up earns points</h3>
+          <p id="memberPointsRule"></p>
+          <p class="tiny">The starting default is 1 point per check-in. You control points per visit, the reward target, reward name and optional surprise rewards in Settings. Your saved choices are preserved.</p>
+          <button class="btn secondary compact" id="btnMemberRewardSettings" type="button">Edit reward rules</button>
+          <p class="tiny">Select a member below, then choose Record Visit at the counter. Opening the app or this dashboard never awards points.</p>
+        </article>
+        <article class="card spaced">
+          <div class="member-controls">
+            <div><label for="memberFilter">Show members</label><select id="memberFilter"><option value="active">Active members</option><option value="all">All members</option></select></div>
+            <div><label for="memberSearch">Find a member</label><input id="memberSearch" type="search" placeholder="Name or customer code" autocomplete="off" /></div>
+          </div>
+          <p id="memberResultCount" class="tiny" role="status"></p>
+          <div id="memberList" class="member-list"></div>
+          <p class="tiny">Only records on this device are included. Demo customers are excluded. Points are current balances; visits are all-time totals, not visits in the activity window. Reward progress uses your current settings. Rewards given and surprise awards come from recorded history only; older unrecorded awards cannot be reconstructed. Being ready for a standard reward is not the same as having received it.</p>
+        </article>
+      </section>
+
       <section id="screen-counter" class="screen active">
         <div class="section-heading">
           <div>
-            <p class="eyebrow">Fast counter workflow</p>
-            <h2>Scan. Revisit. Reward.</h2>
+            <p class="eyebrow">At the counter</p>
+            <h2>Customer visit</h2>
+            <p>Find them, record the visit, reward the return.</p>
           </div>
+          <button class="btn secondary compact" id="btnNewCustomer" type="button">+ Add customer</button>
         </div>
-        <div class="grid">
-          <article class="card">
-            <h3>Find customer</h3>
-            <label for="scanInput">Scan QR or enter customer code</label>
-            <input id="scanInput" placeholder="e.g. CUST-7K4M9Q" autocomplete="off" />
-            <div class="actions">
-              <button class="btn" id="btnHandleScan">Find Customer</button>
-              <button class="btn secondary" id="btnCameraScan">Use Camera</button>
-              <button class="btn secondary" id="btnStopCameraScan">Stop Camera</button>
+
+        <div class="counter-layout">
+          <article class="card scan-card">
+            <div class="card-heading">
+              <div>
+                <span class="step-number">1</span>
+                <h3>Find customer</h3>
+              </div>
+              <span class="tiny muted">QR or code</span>
             </div>
-            <div id="counterNotice" class="notice" role="status">Ready.</div>
-            <div id="cameraPanel" hidden>
+
+            <button class="btn camera-button" id="btnCameraScan" type="button">
+              <span aria-hidden="true">▣</span>
+              Scan customer QR
+            </button>
+
+            <div id="cameraPanel" class="camera-panel" hidden>
               <video id="cameraVideo" playsinline autoplay muted></video>
-              <div id="cameraNotice" class="notice tiny">Camera ready.</div>
+              <div class="camera-controls">
+                <span id="cameraNotice" class="tiny" role="status">Starting camera…</span>
+                <button class="text-button" id="btnStopCameraScan" type="button">Stop</button>
+              </div>
             </div>
+
+            <div class="divider"><span>or</span></div>
+            <label for="scanInput">Name or customer code</label>
+            <div class="lookup-row">
+              <input id="scanInput" placeholder="Start typing…" autocomplete="off" inputmode="search" />
+              <button class="btn secondary" id="btnHandleScan" type="button">Find</button>
+            </div>
+            <div id="searchSuggestions" class="search-suggestions" hidden></div>
+            <div id="counterNotice" class="notice" role="status">Ready for the next customer.</div>
           </article>
 
-          <article class="card">
-            <h3>Current customer</h3>
-            <div id="currentCustomerSummary" class="empty-state">No customer selected.</div>
-            <div class="actions">
-              <button class="btn" id="btnCheckIn">Record Visit</button>
-              <button class="btn secondary" id="btnManualReward">Add Bonus Points</button>
-              <button class="btn secondary" id="btnRedeemReward">Redeem Reward</button>
+          <article class="card customer-action-card">
+            <div class="card-heading">
+              <div>
+                <span class="step-number">2</span>
+                <h3>Record visit</h3>
+              </div>
+              <button class="text-button" id="btnClearCustomer" type="button" hidden>Clear</button>
             </div>
-            <label for="counterNote">Optional note</label>
-            <textarea id="counterNote" placeholder="Add a short customer note"></textarea>
-            <div class="actions">
-              <button class="btn secondary" id="btnAddNote">Save Note</button>
+            <div id="currentCustomerSummary" class="empty-state">
+              <strong>No customer selected</strong>
+              <span>Scan a QR code or find a customer by name.</span>
             </div>
+            <div class="primary-actions">
+              <button class="btn btn-large" id="btnCheckIn" type="button" disabled>Record Visit</button>
+              <button class="btn secondary" id="btnPrintVisitCard" type="button">Print member card / PDF</button>
+              <button class="btn reward-button" id="btnRedeemReward" type="button" hidden>Give Reward</button>
+            </div>
+            <details class="quick-note">
+              <summary>Add a private note</summary>
+              <label class="sr-only" for="counterNote">Customer note</label>
+              <textarea id="counterNote" placeholder="Short note for this business only" aria-describedby="counterNoteHelp" disabled></textarea>
+              <p id="counterNoteHelp" class="tiny muted">Select a customer before writing a note. Unsaved notes clear when you change customers.</p>
+              <button class="btn secondary" id="btnAddNote" type="button">Save note</button>
+            </details>
           </article>
         </div>
-      </section>
 
-      <section id="screen-dashboard" class="screen">
-        <div class="section-heading">
-          <div>
-            <p class="eyebrow">At a glance</p>
-            <h2>Business dashboard</h2>
+        <section class="recent-section" aria-labelledby="recentTitle">
+          <div class="mini-heading">
+            <h3 id="recentTitle">Recent customers</h3>
+            <button class="text-button" id="btnViewCustomers" type="button">View all</button>
           </div>
+          <div id="recentCustomers" class="recent-customers"></div>
+        </section>
+
+        <div class="mini-stats" aria-label="Business totals">
+          <div><strong id="kpiCustomers">0</strong><span>Customers</span></div>
+          <div><strong id="kpiVisits">0</strong><span>Visits</span></div>
+          <div><strong id="kpiRewardReady">0</strong><span>Rewards ready</span></div>
         </div>
-        <div class="kpi-grid">
-          <article class="card"><h3>Customers</h3><div class="kpi" id="kpiCustomers">0</div></article>
-          <article class="card"><h3>Visits</h3><div class="kpi" id="kpiVisits">0</div></article>
-          <article class="card"><h3>Reward ready</h3><div class="kpi" id="kpiRewardReady">0</div></article>
-          <article class="card"><h3>Rewards redeemed</h3><div class="kpi" id="kpiRewardsRedeemed">0</div></article>
-        </div>
-        <div class="split spaced">
-          <article class="card"><h3>Top customers</h3><div id="topCustomers"></div></article>
-          <article class="card"><h3>Recent activity</h3><div id="recentActivity"></div></article>
-        </div>
-        <div class="spaced">
-          <article class="card"><h3>Helpful alerts</h3><div id="alertsPanel"></div></article>
-        </div>
+
+        <aside class="intelligence-strip" aria-labelledby="intelligencePromptTitle">
+          <div class="intelligence-strip-icon" aria-hidden="true">AI</div>
+          <div>
+            <p class="eyebrow">Free optional access</p>
+            <h3 id="intelligencePromptTitle">Turn market change into local advantage</h3>
+            <p>Explore practical AI marketing, social media and industry updates built for independent businesses.</p>
+          </div>
+          <button class="btn secondary" id="btnExploreIntelligence" type="button">Explore insights</button>
+        </aside>
       </section>
 
       <section id="screen-customers" class="screen">
         <div class="section-heading">
           <div>
-            <p class="eyebrow">Customer relationships</p>
-            <h2>Customer CRM</h2>
+            <p class="eyebrow">Local customer list</p>
+            <h2>Customers</h2>
+            <p>Only collect what your business genuinely needs.</p>
           </div>
+          <button class="btn compact" id="btnOpenNewCustomer" type="button">+ Add customer</button>
         </div>
-        <div class="kpi-grid crm-kpi-grid">
-          <article class="card"><h3>Total customers</h3><div class="kpi" id="crmTotal">0</div></article>
-          <article class="card"><h3>Active</h3><div class="kpi" id="crmActive">0</div><p class="tiny muted">Visited within 30 days</p></article>
-          <article class="card"><h3>Follow-up</h3><div class="kpi crm-attention" id="crmFollowUp">0</div><p class="tiny muted">No visit for 45+ days</p></article>
-          <article class="card"><h3>VIP customers</h3><div class="kpi crm-vip" id="crmVip">0</div><p class="tiny muted">10 or more visits</p></article>
-        </div>
-        <article class="card crm-toolbar spaced">
-          <div>
-            <label for="crmSearch">Search customers</label>
-            <input id="crmSearch" placeholder="Name, code, email or phone" />
-          </div>
-          <div>
-            <label for="crmSegmentFilter">Show</label>
-            <select id="crmSegmentFilter">
-              <option value="all">All customers</option>
-              <option value="active">Active</option>
-              <option value="follow-up">Needs follow-up</option>
-              <option value="reward-ready">Reward ready</option>
-              <option value="vip">VIP customers</option>
-              <option value="contactable">Contact permission</option>
-            </select>
-          </div>
-        </article>
-        <div class="split">
-          <article class="card">
-            <h3>Add or edit customer</h3>
-            <label for="crmName">Name <span aria-hidden="true">*</span></label>
-            <input id="crmName" autocomplete="name" />
-            <label for="crmToken">Customer code</label>
-            <input id="crmToken" placeholder="Created automatically" />
-            <label for="crmEmail">Email <span class="muted">(optional)</span></label>
-            <input id="crmEmail" type="email" autocomplete="email" />
-            <label for="crmPhone">Phone <span class="muted">(optional)</span></label>
-            <input id="crmPhone" autocomplete="tel" />
-            <label class="check-row">
-              <input id="crmContactConsent" type="checkbox" />
-              <span>Customer has agreed to receive direct contact from this business.</span>
-            </label>
-            <div class="actions">
-              <button class="btn" id="btnSaveCustomer">Save Customer</button>
-              <button class="btn secondary" id="btnResetCustomer">Clear</button>
-              <button class="btn danger" id="btnDeleteCustomer">Delete</button>
+
+        <div class="customer-workspace">
+          <article class="card customer-list-card">
+            <label for="crmSearch">Find a customer</label>
+            <input id="crmSearch" placeholder="Search name, code, email or phone" inputmode="search" />
+            <div class="filter-row" role="group" aria-label="Customer filter">
+              <button class="filter-chip active" data-segment="all" type="button">All</button>
+              <button class="filter-chip" data-segment="reward-ready" type="button">Reward ready</button>
+              <button class="filter-chip" data-segment="follow-up" type="button">Follow-up</button>
             </div>
+            <input id="crmSegmentFilter" type="hidden" value="all" />
+            <div id="crmList" class="customer-list"></div>
           </article>
-          <article class="card">
-            <h3>CRM customer list</h3>
-            <div id="crmList" class="table-wrap"></div>
-            <h3 class="spaced">Customer profile</h3>
-            <div id="crmProfile" class="empty-state">Select a customer to view their CRM profile.</div>
-            <h3 class="spaced">Relationship history</h3>
-            <div id="crmTimeline" class="empty-state">Select a customer to view their history.</div>
-          </article>
+
+          <div class="customer-detail-stack">
+            <article class="card" id="customerEditor">
+              <div class="card-heading">
+                <h3 id="customerFormTitle">Add customer</h3>
+                <button class="text-button" id="btnResetCustomer" type="button">New</button>
+              </div>
+              <label for="crmName">Customer name <span aria-hidden="true">*</span></label>
+              <input id="crmName" autocomplete="name" placeholder="e.g. Alex" />
+              <label for="crmToken">Member card number</label>
+              <input id="crmToken" placeholder="Created automatically when saved" aria-describedby="memberNumberHelp" autocomplete="off" />
+
+              <p id="memberNumberHelp" class="tiny muted">Leave blank to create a unique number in this workspace. Existing card numbers stay unchanged. This is not your registered Product ID.</p>
+              <details class="optional-fields">
+                <summary>Add contact details <span class="muted">(optional)</span></summary>
+                <label for="crmEmail">Email</label>
+                <input id="crmEmail" type="email" autocomplete="email" />
+                <label for="crmPhone">Phone</label>
+                <input id="crmPhone" autocomplete="tel" inputmode="tel" />
+                <label class="check-row">
+                  <input id="crmContactConsent" type="checkbox" />
+                  <span>Customer agreed to direct contact from this business.</span>
+                </label>
+              </details>
+
+              <div class="actions">
+                <button class="btn" id="btnSaveCustomer" type="button">Save customer</button>
+                <button class="btn danger" id="btnDeleteCustomer" type="button" hidden>Delete</button>
+              </div>
+              <div id="customerFormNotice" class="notice tiny" role="status">Name is the only required detail.</div>
+            </article>
+
+            <article class="card customer-profile-card">
+              <div id="crmProfile" class="empty-state">
+                <strong>Select a customer</strong>
+                <span>Their progress and loyalty card will appear here.</span>
+              </div>
+              <div id="customerCardArea" hidden>
+                <div id="cardPreview">
+                  <div class="card-merchant-brand">
+                    <div class="card-merchant-logo" aria-hidden="true">
+                      <img id="cardMerchantLogo" alt="" />
+                      <span id="cardMerchantMonogram">MB</span>
+                    </div>
+                    <div id="cardBrandName">My Business</div>
+                  </div>
+                  <div id="cardCustomerName">Customer</div>
+                  <div class="small" id="cardCustomerProgress">0 visits · 0 points</div>
+                  <canvas id="cardQrCanvas" width="132" height="132" aria-label="Customer QR code"></canvas>
+                  <div class="small" id="cardCustomerToken">Customer code</div>
+                  <div class="card-product-signature">
+                    <img src="assets/loyalty-4-all-logo.png" alt="" />
+                    <span>Powered locally by <strong>Loyalty4All</strong></span>
+                  </div>
+                </div>
+                <div class="actions">
+                  <button class="btn" id="btnExportCardPng" type="button">Download Card</button>
+                  <button class="btn secondary" id="btnCopyCode" type="button">Copy Code</button>
+                  <button class="btn secondary" id="btnPrintCard" type="button">Print member card / PDF</button>
+                </div>
+                <p class="tiny muted">Choose Save as PDF in your device’s print options, if available. Turn off browser headers and footers for card-only output.</p>
+                <label for="profileNote">Private note</label>
+                <div class="lookup-row">
+                  <input id="profileNote" placeholder="Add a short note" aria-describedby="profileNoteHelp" disabled />
+                  <button class="btn secondary" id="btnAddProfileNote" type="button">Save</button>
+                </div>
+                <p id="profileNoteHelp" class="tiny muted">Select a customer before writing a note. Unsaved notes clear when you change customers.</p>
+                <h3 class="spaced">Recent history</h3>
+                <div id="crmTimeline" class="timeline"></div>
+              </div>
+            </article>
+          </div>
         </div>
       </section>
 
-      <section id="screen-cards" class="screen">
-        <div class="section-heading">
-          <div>
-            <p class="eyebrow">Customer membership</p>
-            <h2>Loyalty cards</h2>
+      <section id="screen-intelligence" class="screen">
+        <div class="intelligence-hero">
+          <div class="intelligence-hero-copy">
+            <p class="eyebrow">Loyalty-4-All Community Intelligence</p>
+            <h2>Smarter local marketing, without the noise.</h2>
+            <p class="intelligence-lead">Practical intelligence to help you understand what is changing across AI marketing, social media and your industry—and what to do next.</p>
+            <div class="trust-points" aria-label="Community Intelligence assurances">
+              <span>No credit card</span>
+              <span>Optional email updates</span>
+              <span>No second registration</span>
+            </div>
+          </div>
+          <div class="signal-visual" aria-hidden="true">
+            <span class="signal-orbit orbit-one"></span>
+            <span class="signal-orbit orbit-two"></span>
+            <div class="signal-core">L4A</div>
+            <span class="signal-chip chip-ai">AI</span>
+            <span class="signal-chip chip-social">Social</span>
+            <span class="signal-chip chip-local">Local</span>
           </div>
         </div>
-        <div class="split">
-          <article class="card">
-            <label for="cardCustomer">Customer</label>
-            <select id="cardCustomer"></select>
-            <div class="actions">
-              <button class="btn" id="btnRenderCard">Preview</button>
-              <button class="btn secondary" id="btnExportCardPng">Download PNG</button>
-              <button class="btn secondary" id="btnPrintCard">Print</button>
-              <button class="btn secondary" id="btnEmailCard">Email Code</button>
-              <button class="btn secondary" id="btnBatchPrintA4">Print A4 Sheet</button>
-            </div>
-          </article>
-          <article class="card">
-            <div id="cardPreview">
-              <div id="cardBrandName">Loyalty-4-All</div>
-              <div id="cardCustomerName">No customer selected</div>
-              <div class="small" id="cardCustomerProgress">0 visits · 0 points</div>
-              <canvas id="cardQrCanvas" width="132" height="132" aria-label="Customer QR code"></canvas>
-              <div class="small" id="cardCustomerToken">Customer code</div>
+
+        <div class="intelligence-layout">
+          <div class="benefit-stack">
+            <article class="benefit-card">
+              <span class="benefit-number">01</span>
+              <div>
+                <h3>Real-Time AI Marketing Pulse</h3>
+                <p>Timely, plain-English updates on AI search, discovery, content and customer engagement—with a practical local-business angle.</p>
+              </div>
+            </article>
+            <article class="benefit-card">
+              <span class="benefit-number">02</span>
+              <div>
+                <h3>Social Media Signals</h3>
+                <p>Important platform shifts, emerging formats and useful opportunities—filtered for relevance, not reach-for-reach’s-sake.</p>
+              </div>
+            </article>
+            <article class="benefit-card">
+              <span class="benefit-number">03</span>
+              <div>
+                <h3>Industry &amp; Local Trends</h3>
+                <p>Concise briefings on customer behaviour, competitive movements and developments that may affect independent businesses.</p>
+              </div>
+            </article>
+            <article class="benefit-card">
+              <span class="benefit-number">04</span>
+              <div>
+                <h3>Tools, Templates &amp; Early Access</h3>
+                <p>Priority access to new Loyalty-4-All capabilities, practical campaigns and selected community pilots.</p>
+              </div>
+            </article>
+          </div>
+
+          <article class="card membership-card" aria-labelledby="updatesPreferenceTitle">
+            <p class="eyebrow">Optional email updates</p>
+            <h3 id="updatesPreferenceTitle">Your choice, already recorded.</h3>
+            <p>Your optional email-updates preference was recorded during registration. There is no second form to complete, and choosing not to receive marketing emails does not affect your access to the app.</p>
+            <p class="muted">To ask about changing your preference, <a href="mailto:Hello@De-Omega-Point.Com?subject=Loyalty-4-All%20email%20preference">contact support</a>. This opens your email app without adding customer details or backups.</p>
+            <div class="membership-boundary">
+              <strong>Your loyalty data stays local.</strong>
+              <span>Customer records, private notes and backups are not sent with registration or optional updates.</span>
             </div>
           </article>
         </div>
+
+        <p class="intelligence-footnote">Community Intelligence provides general business information, not professional advice. Availability and frequency may vary as the service develops.</p>
       </section>
 
       <section id="screen-settings" class="screen">
         <div class="section-heading">
           <div>
             <p class="eyebrow">Simple controls</p>
-            <h2>Settings and data</h2>
+            <h2>Settings &amp; backup</h2>
+            <p>Set it once. Keep your records under your control.</p>
           </div>
         </div>
-        <div class="split">
+
+        <div class="settings-grid">
           <article class="card">
-            <h3>Business</h3>
+            <p class="eyebrow">Shop showcase</p>
+            <h3>Business brand &amp; reward</h3>
+            <div class="brand-settings-preview" aria-live="polite">
+              <div class="settings-logo-shell" aria-hidden="true">
+                <img id="settingsBrandLogoPreview" alt="" />
+                <span id="settingsBrandLogoFallback">MB</span>
+              </div>
+              <div>
+                <span>Your shop</span>
+                <strong id="settingsBrandNamePreview">My Business</strong>
+              </div>
+            </div>
             <label for="settingsBusinessName">Business name</label>
-            <input id="settingsBusinessName" />
+            <input id="settingsBusinessName" placeholder="My Business" />
             <label for="settingsBrandColour">Brand colour</label>
             <input id="settingsBrandColour" type="color" />
-            <label for="settingsBrandLogo">Logo image URL <span class="muted">(optional)</span></label>
-            <input id="settingsBrandLogo" />
-            <button class="btn spaced" id="btnSaveBranding">Save Branding</button>
+            <label for="settingsBrandLogoFile">Shop logo <span class="muted">(optional)</span></label>
+            <input id="settingsBrandLogo" type="hidden" />
+            <input id="settingsBrandLogoFile" type="file" accept="image/png,image/jpeg,image/webp" />
+            <div class="logo-upload-actions">
+              <span class="tiny muted">PNG, JPEG or WebP. Resized and stored on this device.</span>
+              <button class="text-button" id="btnRemoveBrandLogo" type="button">Remove logo</button>
+            </div>
+            <div id="brandLogoNotice" class="notice tiny" role="status" hidden></div>
 
-            <h3 class="spaced">Basic reward</h3>
-            <label for="settingsPointsPerVisit">Points per visit</label>
-            <input id="settingsPointsPerVisit" type="number" min="1" max="100" />
-            <label for="settingsRewardThreshold">Points needed</label>
-            <input id="settingsRewardThreshold" type="number" min="1" max="10000" />
-            <label for="settingsRewardName">Reward name</label>
+            <div class="co-brand-rule">
+              <img src="assets/loyalty-4-all-logo.png" alt="Loyalty-4-All" />
+              <p><strong>Your shop leads the customer experience.</strong> The Loyalty-4-All mark stays present as the trusted platform behind it.</p>
+            </div>
+
+            <div class="reward-fields">
+              <div>
+                <label for="settingsPointsPerVisit">Points per visit</label>
+                <input id="settingsPointsPerVisit" type="number" min="1" max="100" />
+              </div>
+              <div>
+                <label for="settingsRewardThreshold">Points needed</label>
+                <input id="settingsRewardThreshold" type="number" min="1" max="10000" />
+              </div>
+            </div>
+            <label for="settingsRewardName">Reward</label>
             <input id="settingsRewardName" placeholder="e.g. Free coffee" />
-            <button class="btn spaced" id="btnSaveRewards">Save Reward</button>
+            <button class="btn spaced" id="btnSaveSettings" type="button">Save settings</button>
           </article>
 
           <article class="card">
-            <h3>Product registration</h3>
+            <h3>Surprise rewards <span class="optional-label">Optional</span></h3>
+            <p class="muted">Occasionally delight a returning customer. The draw runs locally on this device and at most once per customer per day.</p>
+            <label class="switch-row">
+              <span>
+                <strong>Enable surprise rewards</strong>
+                <small>Off by default</small>
+              </span>
+              <input id="settingsSurpriseEnabled" type="checkbox" />
+            </label>
+            <label for="settingsSurpriseChance">Chance per eligible visit</label>
+            <select id="settingsSurpriseChance">
+              <option value="10">1 in 10</option>
+              <option value="20">1 in 20</option>
+              <option value="50">1 in 50</option>
+            </select>
+            <label for="settingsSurpriseRewardName">Surprise reward</label>
+            <input id="settingsSurpriseRewardName" placeholder="e.g. Free upgrade" />
+            <p class="tiny muted">A surprise reward appears only after a visit is recorded, preventing repeated scans from rerolling the draw.</p>
+          </article>
+
+          <article class="card data-card">
+            <div class="data-heading">
+              <div>
+                <p class="eyebrow">Local-first</p>
+                <h3>Your customer data stays here</h3>
+              </div>
+              <span id="storageBadge" class="storage-badge">This device</span>
+            </div>
+            <p>Customer names, contact details, visits, notes and rewards are saved automatically in a durable database on this device. They are not automatically uploaded to De-Omega-Point.</p>
+            <div class="backup-status">
+              <span>Last backup</span>
+              <strong id="lastBackupStatus">Never</strong>
+            </div>
+            <div class="actions stacked-mobile">
+              <button class="btn" id="btnExportData" type="button">Download Backup</button>
+              <button class="btn secondary" id="btnImportData" type="button">Restore Backup</button>
+              <button class="btn secondary" id="btnExportCsv" type="button">Export Customer CSV</button>
+              <button class="btn secondary" id="btnBatchPrintA4" type="button">Print All Cards</button>
+            </div>
+            <div id="dataNotice" class="notice tiny" role="status">Saved automatically on this device. Download a portable backup before changing devices or clearing website data.</div>
+            <button class="btn secondary spaced" id="btnSettingsUninstall" type="button" aria-haspopup="dialog" aria-controls="uninstallDialog">Uninstall app</button>
+          </article>
+
+          <article class="card community-card">
+            <p class="eyebrow">Community Edition</p>
+            <h3>Complete. Free forever. No expiry.</h3>
+            <p>No Loyalty-4-All account, credit card or compulsory subscription is required to use the loyalty system.</p>
             <dl class="details-list">
-              <div><dt>Edition</dt><dd>Community — Free Forever</dd></div>
-              <div><dt>Product ID</dt><dd id="settingsProductId">—</dd></div>
-              <div><dt>Registered business</dt><dd id="settingsRegisteredBusiness">—</dd></div>
+              <div><dt>Edition</dt><dd>Community</dd></div>
+              <div><dt>Registered Product ID</dt><dd id="registeredProductId" style="overflow-wrap:anywhere">Not checked yet</dd></div>
+              <div><dt>Storage</dt><dd>On this device</dd></div>
             </dl>
-
-            <h3 class="spaced">Backup</h3>
-            <p class="muted">Your records live in this browser. Download regular backups.</p>
-            <div class="actions">
-              <button class="btn" id="btnExportData">Download Backup</button>
-              <button class="btn secondary" id="btnExportCsv">Export Customers CSV</button>
-              <button class="btn secondary" id="btnImportData">Restore Backup</button>
-            </div>
-            <div id="dataNotice" class="notice tiny">No automatic cloud sync.</div>
-
-            <h3 class="spaced">Safe demonstration</h3>
-            <div class="actions">
-              <button class="btn secondary" id="btnLoadDemo">Load Demo Data</button>
-              <button class="btn secondary" id="btnClearDemo">Remove Demo Data</button>
+            <p id="registeredProductStatus" class="tiny" role="status">Connect to check the registration receipt for this browser.</p>
+            <button class="btn secondary" id="btnCheckRegistration" type="button">Check registration</button>
+            <p class="tiny">Registration does not back up or sync customer records. Download Backup before changing devices or clearing website data.</p>
+            <details class="spaced">
+              <summary>Technical details</summary>
+              <dl class="details-list"><div><dt>Local workspace ID</dt><dd id="settingsProductId" style="overflow-wrap:anywhere">—</dd></div></dl>
+              <p class="tiny">Identifies this local workspace only. It is not a registered Product ID, password or recovery key.</p>
+            </details>
+            <button class="btn secondary spaced" id="btnSettingsJoin" type="button">Explore free business updates</button>
+            <div class="legal-links">
+              <a href="privacy.html">Privacy</a>
+              <a href="terms.html">Terms</a>
             </div>
           </article>
         </div>
-      </section>
 
-      <section id="screen-upgrade" class="screen">
-        <div class="upgrade-hero">
-          <div>
-            <p class="eyebrow">Optional growth tools</p>
-            <h2>When loyalty starts working, make it work harder.</h2>
-            <p class="upgrade-lede">Community Edition stays free forever. Upgrade only when saving more time, bringing back more customers or managing a growing team becomes worth paying for.</p>
-          </div>
-          <div class="upgrade-proof">
-            <strong>Keep Community free</strong>
-            <span>No expiry · No forced upgrade · Your local data stays yours</span>
-          </div>
-        </div>
-
-        <div class="upgrade-benefits">
-          <article class="card upgrade-card">
-            <span class="upgrade-number">01</span>
-            <p class="eyebrow">Launch faster</p>
-            <h3>Guided Setup</h3>
-            <p>Start with the right reward, branding and customer workflow—without spending your weekend configuring software.</p>
-            <ul class="benefit-list">
-              <li>Done-with-you business setup</li>
-              <li>Reward strategy and card branding</li>
-              <li>Customer import and staff handover</li>
-            </ul>
-            <button class="btn secondary upgrade-interest" data-interest="guided-setup">I’d value setup help</button>
-          </article>
-
-          <article class="card upgrade-card featured">
-            <span class="upgrade-tag">Most useful for growth</span>
-            <span class="upgrade-number">02</span>
-            <p class="eyebrow">Bring customers back</p>
-            <h3>Growth Tools</h3>
-            <p>Turn customer activity into timely follow-ups, clearer decisions and less manual work.</p>
-            <ul class="benefit-list">
-              <li>Secure cloud backup and device sync</li>
-              <li>Automated birthday and win-back campaigns</li>
-              <li>Deeper retention and reward reporting</li>
-            </ul>
-            <button class="btn upgrade-interest" data-interest="growth-tools">I want growth tools</button>
-          </article>
-
-          <article class="card upgrade-card">
-            <span class="upgrade-number">03</span>
-            <p class="eyebrow">Grow the operation</p>
-            <h3>Teams & Locations</h3>
-            <p>Give staff the right access and see customer loyalty across more than one location.</p>
-            <ul class="benefit-list">
-              <li>Staff accounts and permissions</li>
-              <li>Multi-location customer view</li>
-              <li>Priority onboarding and support</li>
-            </ul>
-            <button class="btn secondary upgrade-interest" data-interest="teams-locations">I’m planning to scale</button>
-          </article>
-        </div>
-
-        <div class="pricing-heading">
-          <div>
-            <p class="eyebrow">Simple monthly pricing</p>
-            <h3>Pay only when the upgrade earns its place.</h3>
-          </div>
-          <span class="mock-badge">Mock checkout · No payment taken</span>
-        </div>
-
-        <div class="pricing-grid">
-          <article class="card price-card current-plan">
-            <p class="eyebrow">Your current plan</p>
-            <h3>Community</h3>
-            <div class="price"><span>A$</span>0<small>/forever</small></div>
-            <p>Core loyalty and local CRM for one independent business.</p>
-            <ul class="benefit-list">
-              <li>Customer loyalty cards and QR check-in</li>
-              <li>Local-first CRM and visit history</li>
-              <li>Rewards, backup and CSV export</li>
-            </ul>
-            <button class="btn secondary" disabled>Current plan</button>
-          </article>
-
-          <article class="card price-card">
-            <p class="eyebrow">Get established</p>
-            <h3>Starter</h3>
-            <div class="price"><span>A$</span>9<small>/month</small></div>
-            <p>For owners who want a smoother setup and secure continuity.</p>
-            <ul class="benefit-list">
-              <li>Everything in Community</li>
-              <li>Guided setup and customer import</li>
-              <li>Secure cloud backup</li>
-            </ul>
-            <button class="btn secondary mock-checkout" data-plan="Starter" data-price="9" data-interest="guided-setup">Choose Starter</button>
-          </article>
-
-          <article class="card price-card featured-price">
-            <span class="upgrade-tag">Best value</span>
-            <p class="eyebrow">Increase retention</p>
-            <h3>Pro</h3>
-            <div class="price"><span>A$</span>19<small>/month</small></div>
-            <p>For businesses ready to bring back more customers with less effort.</p>
-            <ul class="benefit-list">
-              <li>Everything in Starter</li>
-              <li>Win-back and birthday campaigns</li>
-              <li>Retention and reward analytics</li>
-            </ul>
-            <button class="btn mock-checkout" data-plan="Pro" data-price="19" data-interest="growth-tools">Choose Pro</button>
-          </article>
-
-          <article class="card price-card">
-            <p class="eyebrow">Scale the operation</p>
-            <h3>Business</h3>
-            <div class="price"><span>A$</span>39<small>/month</small></div>
-            <p>For growing teams that need control across staff and locations.</p>
-            <ul class="benefit-list">
-              <li>Everything in Pro</li>
-              <li>Staff roles and permissions</li>
-              <li>Multi-location view and priority support</li>
-            </ul>
-            <button class="btn secondary mock-checkout" data-plan="Business" data-price="39" data-interest="teams-locations">Choose Business</button>
-          </article>
-        </div>
-
-        <article class="upgrade-cta">
-          <div>
-            <p class="eyebrow">No sales chase</p>
-            <h3>Register interest in one tap.</h3>
-            <p>We’ll use your existing business registration to understand demand. This does not start a subscription or change your Community Edition.</p>
-          </div>
-          <div id="upgradeNotice" class="notice" role="status">Choose the benefit that would create the most value for your business.</div>
-        </article>
-      </section>
-
-      <section id="screen-help" class="screen">
-        <div class="section-heading">
-          <div>
-            <p class="eyebrow">No training required</p>
-            <h2>Quick help</h2>
-          </div>
-        </div>
-        <div class="grid">
-          <article class="card">
-            <h3>Start in three steps</h3>
-            <ol class="steps">
-              <li>Add a customer.</li>
-              <li>Give them their QR loyalty card.</li>
-              <li>Scan the card and record each visit.</li>
-            </ol>
-          </article>
-          <article class="card">
-            <h3>Protect your records</h3>
-            <p>Customer information stays in this browser. Download a backup regularly and store it safely.</p>
-            <button class="btn secondary" id="btnHelpBackup">Download Backup</button>
-          </article>
-          <article class="card">
-            <h3>Share feedback</h3>
-            <p>Feedback is optional. We send only one scheduled survey after approximately eight weeks.</p>
-            <a class="btn secondary link-btn" id="feedbackLink" href="#" target="_blank" rel="noopener">Share Feedback</a>
-          </article>
-          <article class="card">
-            <h3>Community promise</h3>
-            <p>Free forever. No expiry. No compulsory subscription. No hidden customer-data upload.</p>
-          </article>
-        </div>
+        <p id="appFeedback" class="tiny muted spaced">Tried the app? <a href="mailto:Hello@De-Omega-Point.Com?subject=Loyalty-4-All%20feedback%20or%20support">Share feedback or ask for help</a> (optional). Opens your email app without adding customer details or backups.</p>
       </section>
     </main>
 
     <footer class="container">
-      <span>Loyalty-4-All Community Edition · A De-Omega-Point Project</span>
-      <span>·</span>
-      <a href="privacy.html">Privacy</a>
-      <span>·</span>
-      <a href="terms.html">Terms</a>
+      <img src="assets/loyalty-4-all-logo.png" alt="Loyalty-4-All" />
+      <span><strong>Loyalty4All</strong> Community Edition · A De-Omega-Point Project</span>
     </footer>
   </div>
 
-  <dialog id="mockCheckoutDialog" class="checkout-dialog" aria-labelledby="checkoutTitle">
-    <form method="dialog" class="checkout-panel">
-      <div class="checkout-topline">
-        <span class="mock-badge">Checkout simulation</span>
-        <button class="dialog-close" value="cancel" aria-label="Close checkout">×</button>
+  <dialog id="browserRiskDialog" class="install-dialog" aria-labelledby="browserRiskTitle" aria-describedby="browserRiskDescription">
+    <div class="install-dialog-content">
+      <h2 id="browserRiskTitle">Use this browser as a fallback?</h2>
+      <div id="browserRiskDescription">
+        <p>Installing the app is recommended, but installation alone does not protect your records. Both installed and browser workspaces need regular backups.</p>
+        <ul><li>Clearing site data, private browsing, device loss or device problems can lose local records and registration access.</li><li>Changing browsers does not carry your records or registration receipt with you. There is no automatic migration or sync.</li><li>A customer backup restores records, not registration. A Product ID or registering again with the same email cannot recover access.</li></ul>
+        <p>Have existing records? Download and check a backup before moving between browser and app. Use Download existing backup below; after access is confirmed, Settings &amp; backup provides Download Backup and Restore. Keep backups outside this browser.</p>
+        <p>This choice is remembered only in this browser/profile on this site. We cannot reliably tell whether you are in private browsing.</p>
       </div>
-      <p class="eyebrow">Loyalty-4-All upgrade</p>
-      <h2 id="checkoutTitle">Review your plan</h2>
-      <div class="checkout-summary">
-        <div>
-          <span id="checkoutPlan">Pro</span>
-          <small>Monthly subscription</small>
-        </div>
-        <strong id="checkoutPrice">A$19/month</strong>
-      </div>
-      <dl class="details-list">
-        <div><dt>Business</dt><dd id="checkoutBusiness">Registered business</dd></div>
-        <div><dt>Product ID</dt><dd id="checkoutProductId">—</dd></div>
-        <div><dt>Due today</dt><dd>A$0.00</dd></div>
-      </dl>
-      <div class="mock-payment">
-        <strong>Mock payment</strong>
-        <span>No card details required. No subscription will be created.</span>
-      </div>
-      <button class="btn btn-large" id="btnConfirmMockCheckout" value="default">Confirm Mock Upgrade</button>
-      <button class="btn secondary btn-large checkout-cancel" value="cancel">Cancel</button>
-      <p id="checkoutNotice" class="notice tiny" role="status">This records upgrade interest only. It does not process a payment.</p>
-    </form>
+      <label><input id="browserRiskAcknowledgement" type="checkbox" /> I understand that local records can be lost and I need to keep backups.</label>
+      <div class="actions stacked-mobile"><button class="btn secondary" id="btnCancelBrowserRisk" type="button" autofocus>Cancel / close</button><button class="btn secondary" id="btnBrowserRiskBackup" type="button">Return to backup</button><button class="btn secondary" id="btnAcceptBrowserRisk" type="button" disabled>Accept risks and continue in browser</button></div>
+    </div>
+  </dialog>
+  <dialog id="uninstallDialog" class="install-dialog" aria-labelledby="uninstallDialogTitle" aria-describedby="uninstallDialogIntro"><div class="install-dialog-content"><p class="eyebrow">Loyalty4All · Device removal</p><h2 id="uninstallDialogTitle">Back up before uninstalling</h2><p id="uninstallDialogIntro">Your device handles removal. This button only opens safe instructions.</p><div class="actions stacked-mobile"><button class="btn" id="btnUninstallBackup" type="button">Return to backup</button><button class="btn secondary" id="btnCloseUninstall" type="button" autofocus>Cancel / close</button></div>
+              <p><strong>Keep your records before removing Loyalty4All.</strong> Close this guide and use Download Backup (or Download existing backup on the setup screen) and check that the file is saved somewhere safe outside this app. Export from each browser or installed app that holds records; they may be separate.</p>
+              <p>If a storage or backup warning appears, stop and keep your older backups. An export may contain only recovered or previously saved records. A backup does not restore your registration receipt.</p>
+              <p>Removing the app or clearing website data may permanently lose local customer records and registration access. Reinstalling does not automatically recover them.</p>
+              <p>This is guidance only. Loyalty4All cannot uninstall itself; nothing is removed when you open these instructions.</p>
+              <ul>
+                <li><strong>iPhone / iPad:</strong> Touch and hold the Loyalty4All icon. Choose Remove App, then Delete App and confirm if those options are shown. A saved shortcut may offer a different remove option. Removing only its Home Screen icon is not necessarily uninstalling the app.</li>
+                <li><strong>Android:</strong> Open device Settings → Apps → See all apps → Loyalty4All → Uninstall. If it is only a shortcut, use your launcher’s remove option instead.</li>
+                <li><strong>Chrome on a computer:</strong> Open the installed app, choose its top-right menu → Uninstall Loyalty4All → Remove. Leave “Also delete data from Chrome” unchecked if you want to keep browser data; do not rely on this instead of a backup.</li>
+                <li><strong>Safari on Mac:</strong> In Finder, choose Go → Home → Applications, then move the Loyalty4All web app to the Bin. Other browsers may use different menus; follow their installed-app settings.</li>
+              </ul>
+              <p>Device removal does <strong>not</strong> delete your server registration or withdraw marketing consent. For either request, contact <a href="mailto:Hello@De-Omega-Point.Com">Hello@De-Omega-Point.Com</a>. No request is sent automatically.</p>
+              <p class="tiny">Official help: <a href="https://support.apple.com/en-ie/101550" target="_blank" rel="noopener noreferrer">iPhone / iPad</a> · <a href="https://support.google.com/chrome/answer/9658361?co=GENIE.Platform%3DAndroid&amp;hl=en" target="_blank" rel="noopener noreferrer">Android</a> · <a href="https://support.google.com/chrome/answer/9658361?co=GENIE.Platform%3DDesktop&amp;hl=en" target="_blank" rel="noopener noreferrer">Chrome</a> · <a href="https://support.apple.com/en-au/104996" target="_blank" rel="noopener noreferrer">Safari on Mac</a>. Links open a new tab and need internet access.</p>
+            </div></dialog>
+
+  <dialog id="rewardDialog" class="reward-dialog" aria-labelledby="rewardDialogTitle">
+    <div class="reward-celebration">
+      <div class="reward-burst" aria-hidden="true">★</div>
+      <p class="eyebrow">Surprise reward</p>
+      <h2 id="rewardDialogTitle">A reward just unlocked!</h2>
+      <p id="rewardDialogMessage">Give the customer their surprise reward.</p>
+      <button class="btn btn-large" id="btnCloseRewardDialog" type="button">Great — Continue</button>
+    </div>
+  </dialog>
+
+  <dialog id="installDialog" class="install-dialog" aria-labelledby="installDialogTitle">
+    <div class="install-dialog-content">
+      <img src="assets/icon-192.png" alt="" />
+      <p class="eyebrow">Install Loyalty-4-All</p>
+      <h2 id="installDialogTitle">Installation guidance</h2>
+      <p id="installDialogStatus" role="status" aria-live="polite"></p>
+      <p id="installDetected" role="status">Choose your device or browser.</p>
+      <label for="installDeviceChoice">Instructions for</label>
+      <select id="installDeviceChoice"><option value="auto">Detect automatically</option><option value="ios">iPhone / iPad</option><option value="android">Android — Chrome</option><option value="chrome">Computer — Chrome</option><option value="edge">Computer — Edge</option><option value="safari">Mac — Safari</option><option value="firefox-mac">Mac — Firefox</option><option value="other">Other / not sure</option></select>
+      <p class="tiny">Nothing is installed automatically. If you change browsers, confirm your receipt there before installing; contact support if it is missing. Do not register again just to recover access.</p>
+      <ol id="installSteps">
+        <li>Open your browser menu.</li>
+        <li>Choose <strong>Install app</strong> or <strong>Add to Home Screen</strong>.</li>
+        <li>Confirm to add Loyalty-4-All.</li>
+      </ol>
+      <button class="btn btn-large" id="btnDialogInstall" type="button" hidden>Install app</button>
+      <button class="btn btn-large" id="btnCloseInstallDialog" type="button">Got it</button>
+    </div>
   </dialog>
 
   <script src="js/vendor/qrcode.js"></script>
   <script src="js/vendor/jsQR.js"></script>
-  <script src="config.js"></script>
   <script type="module" src="js/app.js"></script>
 </body>
 </html>

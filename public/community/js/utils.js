@@ -32,3 +32,10 @@ export function downloadTextFile(filename, text, type = 'text/plain') {
   link.click();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
+
+// Spreadsheet applications can ignore leading whitespace/control characters before formulas.
+export function safeCsvValue(value) {
+  const text = String(value ?? '');
+  return /^[\s\u0000-\u001f]*[=+\-@]/.test(text) || /^[\t\r\n]/.test(text) ? `'${text}` : text;
+}
+export function csvCell(value) { return `"${safeCsvValue(value).replaceAll('"', '""')}"`; }
