@@ -20,11 +20,25 @@ hosting="${SITES_PROJECT_ROOT}/dist/.openai/hosting.json"
 }
 
 node --input-type=module - "${worker}" "${hosting}" <<'NODE'
-import { readFile } from "node:fs/promises";
+import { readFile, readdir } from "node:fs/promises";
 import { pathToFileURL } from "node:url";
+import { resolve } from "node:path";
+import { requiresRegistration } from "./server/registration/gate.mjs";
 
 const [workerPath, hostingPath] = process.argv.slice(2);
 JSON.parse(await readFile(hostingPath, "utf8"));
+
+// Fail closed even if an older build left protected files behind, or the
+// hosting platform ignores run_worker_first and serves its static store first.
+async function assertNoProtectedAssets(directory, prefix = "") {
+  for (const entry of await readdir(directory, { withFileTypes: true })) {
+    const path = `${prefix}/${entry.name}`;
+    const file = resolve(directory, entry.name);
+    if (entry.isDirectory()) await assertNoProtectedAssets(file, path);
+    else if (requiresRegistration(path)) throw new Error(`Protected app asset in public archive: ${path}`);
+  }
+}
+await assertNoProtectedAssets(resolve(process.env.SITES_PROJECT_ROOT, "dist/client"));
 
 const workerUrl = pathToFileURL(workerPath);
 workerUrl.searchParams.set("sites-validation", `${process.pid}-${Date.now()}`);
@@ -34,4 +48,4 @@ if (!worker.default || typeof worker.default.fetch !== "function") {
 }
 NODE
 
-echo "Validated Sites artifact: ESM Worker default.fetch and hosting manifest are present."
+echo "Validated Sites artifact: ESM Worker, hosting manifest, and no protected public assets."

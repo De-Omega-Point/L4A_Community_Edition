@@ -1,4 +1,5 @@
-import { integer, sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core";
+import { sql } from "drizzle-orm";
+import { check, index, integer, sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core";
 
 export const communityRegistrations = sqliteTable(
   "community_registrations",
@@ -14,7 +15,11 @@ export const communityRegistrations = sqliteTable(
     termsVersion: text("terms_version").notNull(),
     privacyVersion: text("privacy_version").notNull(),
     feedbackConsent: integer("feedback_consent", { mode: "boolean" }).notNull().default(false),
+    updatesConsent: integer("updates_consent", { mode: "boolean" }).notNull().default(false),
+    intelligenceInterests: text("intelligence_interests").notNull().default("[]"),
+    membershipStatus: text("membership_status").notNull().default("active"),
     registeredAt: text("registered_at").notNull(),
+    updatedAt: text("updated_at").notNull().default(""),
     surveyDueAt: text("survey_due_at"),
     surveyStatus: text("survey_status").notNull().default("not_due"),
     welcomeStatus: text("welcome_status").notNull().default("pending"),
@@ -25,3 +30,34 @@ export const communityRegistrations = sqliteTable(
     uniqueIndex("community_registrations_product_id_unique").on(table.productId),
   ],
 );
+
+export const registeredProducts = sqliteTable("registered_products", {
+  id: text("id").primaryKey().notNull(),
+  receiptHash: text("receipt_hash").notNull().unique(),
+  kind: text("kind").notNull(),
+  contactName: text("contact_name").notNull(),
+  businessName: text("business_name"),
+  email: text("email").notNull(),
+  registeredAt: text("registered_at").notNull(),
+  termsAcceptedAt: text("terms_accepted_at").notNull(),
+  termsVersion: text("terms_version").notNull(),
+  privacyAcknowledgedAt: text("privacy_acknowledged_at").notNull(),
+  privacyVersion: text("privacy_version").notNull(),
+  marketingConsent: integer("marketing_consent").notNull().default(0),
+  marketingConsentAt: text("marketing_consent_at"),
+  marketingConsentVersion: text("marketing_consent_version"),
+  createdAt: text("created_at").notNull(),
+  appOpenedAt: text("app_opened_at"),
+  installRequestedAt: text("install_requested_at"),
+  installObservedAt: text("install_observed_at"),
+}, table => [
+  index("registered_products_created_at_idx").on(sql`${table.createdAt} DESC`, table.id),
+  check("registered_products_id_length", sql`length(${table.id}) = 36`),
+  check("registered_products_receipt_hash", sql`length(${table.receiptHash}) = 64 AND ${table.receiptHash} NOT GLOB '*[^0-9a-f]*'`),
+  check("registered_products_kind", sql`${table.kind} IN ('business', 'individual')`),
+  check("registered_products_contact_length", sql`length(${table.contactName}) BETWEEN 1 AND 120`),
+  check("registered_products_email_length", sql`length(${table.email}) BETWEEN 3 AND 254`),
+  check("registered_products_marketing_choice", sql`${table.marketingConsent} IN (0, 1)`),
+  check("registered_products_business_name", sql`(${table.kind} = 'business' AND ${table.businessName} IS NOT NULL AND length(${table.businessName}) BETWEEN 1 AND 120) OR (${table.kind} = 'individual' AND ${table.businessName} IS NULL)`),
+  check("registered_products_marketing_evidence", sql`(${table.marketingConsent} = 1 AND ${table.marketingConsentAt} IS NOT NULL AND ${table.marketingConsentVersion} IS NOT NULL) OR (${table.marketingConsent} = 0 AND ${table.marketingConsentAt} IS NULL AND ${table.marketingConsentVersion} IS NULL)`),
+]);

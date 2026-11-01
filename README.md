@@ -1,108 +1,83 @@
-# vinext-starter
+# Loyalty4All Community Edition
 
-A clean full-stack starter running on
-[vinext](https://github.com/cloudflare/vinext), with optional Cloudflare D1 and
-Drizzle support.
+**Official Community Edition source repository:**
+[De-Omega-Point/L4A_Community_Edition](https://github.com/De-Omega-Point/L4A_Community_Edition).
 
-## Prerequisites
+This review branch consolidates the complete web/PWA application and supporting
+source documentation. It is a proposed source update, **not a live release**.
+The main branch is unchanged until separately reviewed and merged.
 
-- Node.js `>=22.13.0`
-- Linux with `flock`, `curl`, and GNU `timeout`
+## One application
 
-## Sites Lifecycle
+The root is the Community Edition app: find or scan a customer, record a visit,
+and give a reward. Customer records, notes, consent, visits and rewards remain
+local to the merchant's browser/profile/origin. JSON backup/restore and CSV export
+are merchant-controlled; local storage and installation are not backups.
 
-The Sites lifecycle CLI runs the locked dependency install before returning this checkout. Edit the source under `app/`, then checkpoint when a coherent milestone is ready to inspect or share. The remote Sites builder runs `npm run build` against the pushed commit. Do not repeat install or build as a normal pre-checkpoint step.
+- `app/`, `public/community/`: registration UI and local-first loyalty app.
+- `worker/`, `server/`, `db/`, `drizzle/`: receipt-gated Worker backend, D1 schema
+  and migration source. **No actual database or customer records are included.**
+- `build/`, `scripts/`, `tests/`: build integration, verification and synthetic tests.
+- `marketing/`: separately scoped storefront source snapshot, not another app.
+- `docs/`: release status, review plans and explicitly marked historical documents.
 
-This starter does not use `wrangler.jsonc`.
+## Run and verify
 
-`install:ci` is intentionally a single, non-retrying `npm ci`. It refuses a concurrent install for the same project, consumes a matching image-seeded npm cache with `--prefer-offline` while retaining registry fallback for a missing cache object, otherwise downloads and verifies the complete vinext tarball recorded in `package-lock.json`, limits npm to one socket, and terminates a stalled install. `build` applies a short timeout and then validates the Sites artifact. These helpers target Linux and use GNU `timeout`; they are not native macOS scripts.
+Use Node.js >=22.13.0 on Linux with curl, flock and GNU timeout.
 
-Scripts that need writable project-scoped home, npm, XDG, and temporary paths use `scripts/sites-env.sh`. The `dev` and `start` scripts honor the caller's runtime environment and keep Wrangler logs inside the checkout. The generated `.sites-runtime/` directory is disposable and ignored by Git.
-
-## Included Shape
-
-- edit site code under `app/`
-- `app/chatgpt-auth.ts` provides optional dispatch-owned ChatGPT sign-in helpers
-- `.openai/hosting.json` declares optional Sites D1 and R2 bindings
-- `vite.config.ts` simulates declared bindings for local development
-- `db/index.ts` reads the D1 binding from the Cloudflare Worker environment
-- `db/schema.ts` starts intentionally empty
-- `examples/d1/` contains an optional D1 example surface
-- `drizzle.config.ts` supports local migration generation when needed
-
-## Workspace Auth Headers
-
-OpenAI workspace sites can read the current user's email from
-`oai-authenticated-user-email`.
-
-SIWC-authenticated workspace sites may also receive
-`oai-authenticated-user-full-name` when the user's SIWC profile has a non-empty
-`name` claim. The full-name value is percent-encoded UTF-8 and is accompanied by
-`oai-authenticated-user-full-name-encoding: percent-encoded-utf-8`.
-
-Treat the full name as optional and fall back to email when it is absent:
-
-```tsx
-import { headers } from "next/headers";
-
-export default async function Home() {
-  const requestHeaders = await headers();
-  const email = requestHeaders.get("oai-authenticated-user-email");
-  const encodedFullName = requestHeaders.get("oai-authenticated-user-full-name");
-  const fullName =
-    encodedFullName &&
-    requestHeaders.get("oai-authenticated-user-full-name-encoding") ===
-      "percent-encoded-utf-8"
-      ? decodeURIComponent(encodedFullName)
-      : null;
-
-  const displayName = fullName ?? email;
-  // ...
-}
+```sh
+npm run install:ci
+npm run dev
+# Before release:
+npm run check
 ```
 
-## Optional Dispatch-Owned ChatGPT Sign-In
+`check` runs lint, verified Worker build/artifact checks, all tests, generated
+Worker runtime types and TypeScript. `npm run test:unit` runs browser-independent
+checks. Runtime output, dependencies and generated artifacts stay ignored.
+The included web workflow checks pull requests/main; it has no deployment step.
+Native app-store builds are paused and the Android workflow is disabled.
+Native shells/binaries are not included in this web source consolidation.
 
-Import the ready-to-use helpers from `app/chatgpt-auth.ts` when the site needs
-optional or required ChatGPT sign-in:
+## Source is not hosting or data migration
 
-- Use `getChatGPTUser()` for optional signed-in UI.
-- Use `requireChatGPTUser(returnTo)` for server-rendered pages that should send
-  anonymous visitors through Sign in with ChatGPT.
-- Use `chatGPTSignInPath(returnTo)` and `chatGPTSignOutPath(returnTo)` for
-  browser links or actions.
-- Pass a same-origin relative `returnTo` path for the destination after sign-in
-  or sign-out. The helper validates and safely encodes it.
-- Mark protected pages with `export const dynamic = "force-dynamic"` because
-  they depend on per-request identity headers.
+Existing hosted app: https://loyalty-for-all-community.sammielee.chatgpt.site/community/
 
-Dispatch owns `/signin-with-chatgpt`, `/signout-with-chatgpt`, `/callback`, the
-OAuth cookies, and identity header injection. Do not implement app routes for
-those reserved paths. Routes that do not import and call the helper remain
-anonymous-compatible.
+The last recorded live baseline is Sites v20, source
+`8d9632d1576c6acaba41d8c642038d4096a854aa`. This branch carries the newer cumulative
+252-test install-primary/browser-last candidate. A source commit does not make
+that candidate live. The existing `.openai/hosting.json` identity and D1 binding
+are preserved as source configuration, not recreated or applied here.
 
-SIWC establishes identity only; it does not prove workspace membership. Use the
-Sites hosting platform's access policy controls for workspace-wide restrictions,
-or enforce explicit server-side membership or allowlist checks.
+This import performs no deployment, DNS/Pages change, database migration,
+credential creation, owner-access change, email activation or record transfer.
+D1 migration files and proposed outbox SQL are source only; verify actual live
+schema and obtain separate approval before any rollout. SQL in `docs/` is not
+automatically applied. Never run migration examples against production casually.
 
-Use SIWC for account pages, user-specific dashboards, saved records, and write
-actions tied to the current ChatGPT user. Leave public content anonymous.
+Registration stores minimal self-reported contact details and a server Product
+ID separately from merchant customer records. A hashed receipt gates app access;
+a public Product ID is neither a password nor verified identity. Owner access
+remains subject to its existing verified server-identity boundary.
 
-## Diagnostic Commands
+## Proposed release and remaining checks
 
-- `npm run install:ci`: perform the one bounded lockfile install
-- `npm run dev`: start the Vite/Vinext development server
-- `npm run build`: build and validate the deployable Sites artifact
-- `npm run start`: start the built Vinext application
-- `npm test`: build, validate, and verify the rendered development-preview metadata
-- `npm run validate:artifact`: recheck an existing artifact's manifest and ESM `default.fetch` export
-- `npm run db:generate`: generate Drizzle migrations after schema changes
+Installation is the primary recommendation; browser use is the last fallback,
+requiring an unchecked risk acknowledgement and explicit acceptance. A local
+choice flag cannot bypass the receipt gate. Firefox on Mac gets honest browser
+fallback guidance instead of a nonexistent install action. App shell updates
+retain the all-tabs-close behavior.
 
-Use build and validation commands for targeted diagnosis after a remote failure, not as part of the normal checkpoint path.
+**Secure lost-receipt recovery is unavailable.** Use an original browser/app
+that still has access, or contact support for guidance. A customer backup,
+public Product ID or repeated same-email registration does not restore access.
+Installation, switching browser or changing host does not move existing records.
 
-The timeout defaults can be overridden for a controlled canary with `SITES_INSTALL_TIMEOUT`, `SITES_INSTALL_KILL_AFTER`, `SITES_BUILD_TIMEOUT`, and `SITES_BUILD_KILL_AFTER`. A timeout fails the command; the helpers never retry an unchanged install or build.
+Automated tests and synthetic browser review are not real-device acceptance.
+Physical iPhone/Safari and Android/Chrome installation, camera/scanning, offline
+relaunch, update handling, backup/export/restore and browser-to-installed data
+behavior still require verification before release. No real customer data should
+be used for those checks. See [release status](docs/RELEASE_STATUS.md).
 
-## Learn More
-
-- [vinext Documentation](https://github.com/cloudflare/vinext)
-- [Drizzle D1 Guide](https://orm.drizzle.team/docs/get-started/d1-new)
+Historical review documents preserve prior decisions, not current deployment
+instructions. Where they conflict, this README and RELEASE_STATUS take priority.

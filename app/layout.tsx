@@ -13,11 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Loyalty-4-All — Community Edition",
-  description: "A free-forever, local-first loyalty-first CRM for small businesses.",
-  other: {
-    "codex-preview": "development",
-  },
+  title: "Loyalty4All — Community Edition",
+  description: "A free, local-first loyalty app for independent businesses. Reward returning customers and install directly from the web.",
   icons: {
     icon: "/community/assets/icon-192.png",
     shortcut: "/community/assets/icon-192.png",

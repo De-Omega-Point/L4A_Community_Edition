@@ -40,3 +40,19 @@ next-env.d.ts
 /.sites-runtime/
 /outputs/
 /work/
+
+# Generated native bundles, TypeScript state and signing material
+/native-web/
+*.tsbuildinfo
+*.jks
+*.keystore
+*.p12
+*.mobileprovision
+
+# Private/runtime artifacts
+*.log
+*.sqlite
+*.sqlite3
+*.db
+*.db-wal
+*.db-shm

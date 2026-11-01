@@ -1,0 +1,11 @@
+{
+  "name": "loyalty4all-landing",
+  "version": "1.1.0",
+  "description": "Loyalty-4-All merchant product website and optional email feedback; payments unavailable.",
+  "private": true,
+  "scripts": {
+    "check": "node scripts/check-links.mjs && node --test tests/*.test.mjs",
+    "test": "node --test tests/*.test.mjs"
+  },
+  "devDependencies": {}
+}
