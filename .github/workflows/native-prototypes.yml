@@ -48,7 +48,15 @@ jobs:
         run: npm run tauri -- build --target ${{ matrix.target }} --bundles ${{ matrix.bundle }} --ci
       - name: Collect exact bytes and checksums
         run: node scripts/collect-artifacts.mjs ${{ matrix.target }}
+      - name: Inspect Mac package and respect Gatekeeper
+        if: runner.os == 'macOS'
+        run: node scripts/smoke-macos.mjs
+      - name: Install and startup smoke on disposable Windows runner
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: ./scripts/smoke-windows.ps1
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: UNSIGNED-TEST-ONLY-${{ matrix.target }}
           path: native/prototype/evidence/
@@ -102,6 +110,7 @@ jobs:
             echo 'Unexpected signed APK; refusing artifact upload'; exit 1
           fi
           node scripts/collect-artifacts.mjs android-aarch64
+          python scripts/inspect-apk.py
       - uses: actions/upload-artifact@v4
         with:
           name: UNSIGNED-NOT-INSTALLABLE-android-aarch64

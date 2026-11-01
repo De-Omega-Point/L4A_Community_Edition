@@ -38,3 +38,15 @@ are actually met. No extra paid services or signing credentials are introduced.
 Commands: `npm ci --ignore-scripts`, `npm test`, then platform-specific workflow.
 The parent `native/README.md` records a future activation design proposal; that
 design is NOT implemented and the prototype does not claim to solve it.
+
+## Explicitly requested package testing
+
+CI now records read-only DMG verification, bundle/architecture and Gatekeeper
+assessment. A refusal stops Mac launch testing; no protection is disabled or
+quarantine removed. Windows smoke testing requires preexisting WebView2, installs
+the MSI into a disposable runner directory, observes the process for eight
+seconds, then stops/uninstalls only that app. Android APK testing checks ZIP,
+manifest, ARM64 ELF library and absent signing; it does not install an unsigned
+APK. Reports travel alongside exact package checksums. A process remaining alive
+is **startup smoke only**, not registration/offline/backup/camera acceptance.
+No real customer records or production registration submission are used.
