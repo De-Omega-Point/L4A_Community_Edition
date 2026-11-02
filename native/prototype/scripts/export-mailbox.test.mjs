@@ -40,3 +40,27 @@ test('mailbox cannot be replaced and subframes receive no transport', () => {
   const subframe = { window: { top: {} } }; vm.createContext(subframe); vm.runInContext(source, subframe);
   assert.equal(subframe.window.__L4A_EXPORT_MAILBOX_V1__, undefined);
 });
+test('invalid metadata fails before transport and click exceptions release the request', async () => {
+  const { api, sandbox, clicked, revoked } = setup();
+  for (const args of [[{}, '{}', 'application/json'], ['x'.repeat(181), '{}', 'application/json'], ['x.json', '{}', {}], ['x.json', '{}', 'x'.repeat(65)]]) {
+    assert.equal((await api.save(...args)).status, 'failed');
+  }
+  assert.equal(clicked.length, 0);
+  sandbox.document.createElement = () => ({ click() { throw new Error('blocked'); } });
+  assert.equal((await api.save('x.json', '{}', 'application/json')).status, 'failed');
+  assert.equal(revoked.length, 1);
+  assert.equal((await api.save('x.json', '{}', 'application/json')).status, 'failed');
+  assert.equal(revoked.length, 2);
+});
+
+test('an open native dialog stays single-flight after timeout until it is closed', async () => {
+  const { api, clicked, timers } = setup();
+  const first = api.save('backup.json', '{}', 'application/json');
+  const data = api.take(clicked[0]); timers[0]();
+  assert.equal((await first).status, 'unconfirmed');
+  assert.equal((await api.save('backup.json', '{}', 'application/json')).status, 'busy');
+  api.complete(clicked[0], data.token, 'cancelled');
+  const next = api.save('backup.json', '{}', 'application/json');
+  const nextData = api.take(clicked[1]); api.complete(clicked[1], nextData.token, 'saved');
+  assert.equal((await next).status, 'saved');
+});

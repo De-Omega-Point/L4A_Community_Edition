@@ -11,6 +11,7 @@ addEventListener('DOMContentLoaded', () => setTimeout(async () => {
     const text = scenario === 'saved-csv' ? csv : scenario === 'invalid' ? '{}' : scenario === 'oversized' ? 'x'.repeat(20 * 1024 * 1024 + 1) : json;
     const name = scenario === 'saved-csv' ? 'synthetic-customers.csv' : 'synthetic-backup.json';
     const type = scenario === 'saved-csv' ? 'text/csv;charset=utf-8' : 'application/json';
+    const started = performance.now();
     const first = mailbox.save(name, text, type);
     if (scenario === 'repeated') report.secondStatus = (await mailbox.save(name, text, type)).status;
     if (scenario === 'busy-navigation') {
@@ -21,6 +22,8 @@ addEventListener('DOMContentLoaded', () => setTimeout(async () => {
       report.navigationBlocked = location.href === original;
     } else if (scenario === 'timeout-retry') {
       report.firstStatus = (await first).status;
+      report.firstElapsedMs = Math.round(performance.now() - started);
+      document.title = "L4A_EXPORT_STAGE:first-timeout";
       report.secondStatus = (await mailbox.save(name, text, type)).status;
       document.title = 'L4A_EXPORT_STAGE:timeout-busy';
       await new Promise(resolve => setTimeout(resolve, 3000));

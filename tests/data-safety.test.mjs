@@ -406,3 +406,15 @@ test('backup records completion only for native verified saved, never cancel/fai
     assert.doesNotMatch(notices[0], /Backup downloaded/);
   }
 });
+
+
+test('legacy backup timestamps remain unverified until a confirmed native save', async () => {
+  await setup();
+  localStorage.setItem(state.storageKeys.backupMeta, '2026-01-01T00:00:00.000Z');
+  assert.equal(state.lastBackupWasVerified(), false);
+  const savedAt = state.markBackupCreated();
+  assert.equal(state.lastBackupAt(), savedAt);
+  assert.equal(state.lastBackupWasVerified(), true);
+  localStorage.setItem(state.storageKeys.backupMeta, '2026-02-01T00:00:00.000Z');
+  assert.equal(state.lastBackupWasVerified(), false);
+});

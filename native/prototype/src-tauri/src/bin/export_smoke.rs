@@ -34,6 +34,9 @@ fn main() {
                 false
             })
             .on_document_title_changed(move |_, title| {
+                if title == "L4A_EXPORT_STAGE:first-timeout" {
+                    std::fs::write(report.with_extension("timeout"), "first-request-resolved").expect("Cannot write smoke timeout stage");
+                }
                 if title == "L4A_EXPORT_STAGE:timeout-busy" {
                     std::fs::write(report.with_extension("stage"), "cancel-first-dialog").expect("Cannot write smoke stage");
                 }

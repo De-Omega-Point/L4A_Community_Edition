@@ -13,7 +13,14 @@
       return new Promise(resolve => {
         const url = URL.createObjectURL(new Blob([text], { type }));
         const token = crypto.randomUUID();
-        const timer = setTimeout(() => api.complete(url, token, 'unconfirmed'), 120000);
+        const timer = setTimeout(() => {
+          if (!pending || pending.url !== url || pending.token !== token) return;
+          if (pending.taken) {
+            // The OS dialog may still be open. Report uncertainty, but keep the
+            // single-flight lock until native completion closes that request.
+            pending.resolve({ status: 'unconfirmed' });
+          } else api.complete(url, token, 'unconfirmed');
+        }, 120000);
         pending = { url, token, filename, text, type, resolve, timer };
         try {
           const a = document.createElement('a');

@@ -13,13 +13,19 @@ do not transfer. No lost-receipt recovery is added. Use synthetic records only.
 Community Edition remains free forever, with no expiry/timed trial.
 
 No native commands/plugins or remote capabilities. Navigation is restricted to
-the local landing and exact existing HTTPS host. Desktop new windows, file downloads
-and permissions (including camera) are denied. Tauri does not support the
-new-window callback on Android; Android popup/download behavior remains unverified and
-requires native-device acceptance before release. These restrictions intentionally
-mean backup/export/scanning and full native usability are NOT accepted yet.
-Offline cold start is not promised. The live browser/PWA remains unchanged.
+the local landing and exact existing HTTPS host. Desktop new windows and device
+permissions (including camera) remain denied, as do all WebView-managed disk
+downloads. Windows now has a narrow content-only export transport: a bounded
+backup/CSV payload, native Save As confirmation, exclusive new-file write and
+byte verification. JavaScript cannot supply a filesystem path. See
+[EXPORT-SAVE-REVIEW.md](EXPORT-SAVE-REVIEW.md) for the security boundary and limits.
+The matching hosted JavaScript has not been published, so the review package
+must not be treated as a working customer export release yet.
 
+Mac download restrictions remain unchanged. Tauri does not support the new-window
+callback on Android; Android popup/download behaviour remains unverified. Native
+registration continuity, offline cold start and scanning remain unaccepted. The
+live browser/PWA remains unchanged.
 CI builds real unsigned `.dmg`, `.msi` and unsigned release `.apk` containers on
 standard public-repo runners. It creates no keys, uses no secrets, has only
 contents:read, never publishes a release, never merges or deploys. Android guards
@@ -36,8 +42,7 @@ not private files. Website manifest stays unavailable until customer release gat
 are actually met. No extra paid services or signing credentials are introduced.
 
 Commands: `npm ci --ignore-scripts`, `npm test`, then platform-specific workflow.
-The parent `native/README.md` records a future activation design proposal; that
-design is NOT implemented and the prototype does not claim to solve it.
+Registration transfer is NOT implemented and the prototype does not claim to solve it.
 
 ## Explicitly requested package testing
 
@@ -50,3 +55,13 @@ manifest, ARM64 ELF library and absent signing; it does not install an unsigned
 APK. Reports travel alongside exact package checksums. A process remaining alive
 is **startup smoke only**, not registration/offline/backup/camera acceptance.
 No real customer records or production registration submission are used.
+
+## Controlled Windows export tests
+
+An explicitly feature-gated separate `l4a-export-smoke` executable tests synthetic
+exports through the same native handler and OS dialog. It is built only after the
+normal MSI has been packaged and is never included in that MSI. It permits a local
+fixture origin only in this test build. Runtime reports distinguish actual save,
+cancellation, no-overwrite failure, repeats, invalid/oversized input and delayed
+timeout/navigation cases. Saved bytes are also passed to the production restore
+validator; that is not a full interactive registered-app restore test.

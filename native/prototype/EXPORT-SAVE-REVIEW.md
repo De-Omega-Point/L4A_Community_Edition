@@ -10,11 +10,11 @@ Rust independently checks the exact page and Blob origin, request token, 20 MB U
 
 A failed/interrupted write may leave an incomplete new file. No success or backup timestamp is recorded for it. It is not deleted by pathname after handle close because another process could have replaced that path. Choose a new name on retry. The app never automatically opens exported files.
 
-One export can be pending. Native navigation is refused during processing. Generation and exact current URL checks protect receipt/commit/result against stale pages. Expired operations do not commit after a long-open dialog. Missing native evaluation callbacks release the pending lock. The browser transport times out as unconfirmed, never saved. File selection is user intent; a Blob origin or filename alone is not treated as consent.
+One export can be pending. Native navigation is refused during processing. Generation and exact current URL checks protect receipt/commit/result against stale pages. Expired operations do not commit after a long-open dialog. Missing native evaluation callbacks release the pending lock. The browser transport times out as unconfirmed, never saved. If native has already taken the payload, its single-flight lock remains until the OS dialog is closed, so a timeout cannot silently start a second save. File selection is user intent; a Blob origin or filename alone is not treated as consent.
 
 ## Honest UI and limits
 
-The updated helper waits for the matching native result. Only `saved` records a backup timestamp. Cancelled, failed, busy and unconfirmed paths cannot do so. Ordinary browsers report only `requested`; there is no browser API here to verify completion. Historical stored backup timestamps predate this check and are not proof that an old file exists.
+The updated helper waits for the matching native result. Only `saved` records a backup timestamp. Cancelled, failed, busy and unconfirmed paths cannot do so. Ordinary browsers report only `requested`; there is no browser API here to verify completion. Historical stored backup timestamps are preserved and labelled Previously requested, unverified. A separate matching verification marker distinguishes new native saves; old timestamps are not proof that a file exists.
 
 The mailbox is not a defence against fully compromised first-party JavaScript: such code could forge its own UI or inspect its own token. Rust's independent validation, native confirmation and exclusive write remain the actual filesystem security boundary. This transport cannot grant read access, arbitrary paths, command execution or automatic opening.
 

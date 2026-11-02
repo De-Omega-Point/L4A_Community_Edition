@@ -21,6 +21,7 @@ import {
   findCustomers,
   getCustomerById,
   lastBackupAt,
+  lastBackupWasVerified,
   loadData,
   markBackupCreated,
   prepareBackup,
@@ -90,7 +91,7 @@ function backupFilename() {
 function updateBackupStatus() {
   const value = lastBackupAt();
   document.getElementById('lastBackupStatus').textContent = value
-    ? new Date(value).toLocaleString('en-AU', { dateStyle: 'medium', timeStyle: 'short' })
+    ? `${new Date(value).toLocaleString('en-AU', { dateStyle: 'medium', timeStyle: 'short' })} · ${lastBackupWasVerified() ? 'Save verified' : 'Previously requested, unverified'}`
     : 'Never';
 }
 
