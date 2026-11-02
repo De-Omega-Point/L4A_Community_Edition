@@ -21,6 +21,12 @@ public static class ExportDialogControls {
     var read=new StringBuilder(text.Length+10);
     if (SendMessageTimeout(h,0x000D,(IntPtr)read.Capacity,read,2,3000,out result)==IntPtr.Zero || read.ToString()!=text) throw new Exception("Native filename readback differs");
   }
+  [DllImport("user32.dll", CharSet=CharSet.Unicode, SetLastError=true)] static extern IntPtr SendMessageTimeout(IntPtr h,uint m,IntPtr w,IntPtr l,uint f,uint t,out IntPtr r);
+  public static void SelectFileName(IntPtr h) {
+    if (h == IntPtr.Zero || !Class(h).Equals("Edit",StringComparison.OrdinalIgnoreCase)) throw new Exception("Filename HWND is not an Edit control");
+    IntPtr result;
+    if (SendMessageTimeout(h,0x00B1,IntPtr.Zero,new IntPtr(-1),2,3000,out result)==IntPtr.Zero) throw new Exception("Cannot select native filename text");
+  }
   public static string ReadFileName(IntPtr h) {
     if (h == IntPtr.Zero || !Class(h).Equals("Edit",StringComparison.OrdinalIgnoreCase)) throw new Exception("Filename HWND is not an Edit control");
     var read=new StringBuilder(32768); IntPtr result;
@@ -33,8 +39,11 @@ public static class ExportDialogControls {
   }
 }
 '@
-function Invoke-DialogButton($button) {
+function Invoke-DialogButton($button, $dialog) {
   if (!$button) { throw 'Native dialog button missing' }
+  $keyboard = New-Object -ComObject WScript.Shell
+  if (!$keyboard.AppActivate($dialog.Current.Name)) { throw 'Could not activate native dialog before button click' }
+  Start-Sleep -Milliseconds 250
   $pattern = $null
   if ($button.TryGetCurrentPattern([System.Windows.Automation.InvokePattern]::Pattern, [ref]$pattern)) { $pattern.Invoke() }
   else { [ExportDialogControls]::Click([IntPtr]$button.Current.NativeWindowHandle) }
@@ -61,7 +70,9 @@ function Set-DialogFileName($dialog, $destination) {
   Start-Sleep -Milliseconds 250
   $keyboard.SendKeys('%n')
   Start-Sleep -Milliseconds 250
-  $keyboard.SendKeys('^a')
+  # The legacy Edit control does not implement Ctrl+A reliably. Select text
+  # without changing it, then type real keys so the shell sees EN_CHANGE.
+  [ExportDialogControls]::SelectFileName([IntPtr]$edit.Current.NativeWindowHandle)
   $escaped = -join ($destination.ToCharArray() | ForEach-Object {
     switch ($_) {
       '{' { '{{}' } '}' { '{}}' }
@@ -71,7 +82,8 @@ function Set-DialogFileName($dialog, $destination) {
   $keyboard.SendKeys($escaped)
   $keyboard.SendKeys('{TAB}')
   Start-Sleep -Milliseconds 350
-  if ([ExportDialogControls]::ReadFileName([IntPtr]$edit.Current.NativeWindowHandle) -cne $destination) { throw 'Keyboard filename readback differs from chosen destination' }
+  $readback = [ExportDialogControls]::ReadFileName([IntPtr]$edit.Current.NativeWindowHandle)
+  if ($readback -cne $destination) { throw "Keyboard filename readback differs: $readback" }
 
 }
 $exe = Resolve-Path 'src-tauri/target/x86_64-pc-windows-msvc/release/l4a-export-smoke.exe'
@@ -118,7 +130,7 @@ foreach ($scenario in @('saved-json', 'saved-csv', 'cancel', 'exists', 'repeated
           throw "Timed out waiting for first unconfirmed/second busy outcome; first timeout observed: $firstTimeoutObserved"
         }
         $cancel = Find-DialogButton $dialog 'Cancel' '2'
-        Invoke-DialogButton $cancel
+        Invoke-DialogButton $cancel $dialog
         Start-Sleep -Seconds 1
         $dialog = $null
         $expiry = (Get-Date).AddSeconds(90)
@@ -129,7 +141,10 @@ foreach ($scenario in @('saved-json', 'saved-csv', 'cancel', 'exists', 'repeated
           }
           if (!$dialog) { Start-Sleep -Milliseconds 250 }
         }
-        if (!$dialog) { throw 'Retry did not open a fresh native Save As dialog' }
+        if (!$dialog) {
+          $fixtureOutcome = if (Test-Path $output) { Get-Content $output -Raw } else { 'no fixture completion' }
+          throw "Retry did not open a fresh native Save As dialog: $fixtureOutcome"
+        }
       }
       if ($scenario -eq 'cancel') {
         $button = Find-DialogButton $dialog 'Cancel' '2'
@@ -138,7 +153,7 @@ foreach ($scenario in @('saved-json', 'saved-csv', 'cancel', 'exists', 'repeated
         $button = Find-DialogButton $dialog 'Save' '1'
       }
       if (!$button) { throw 'Native Save/Cancel button not discoverable' }
-      Invoke-DialogButton $button
+      Invoke-DialogButton $button $dialog
     } elseif ($dialog) { throw 'Rejected payload unexpectedly opened a Save As dialog' }
     $deadline = (Get-Date).AddSeconds(50)
     while (!(Test-Path $output) -and (Get-Date) -lt $deadline) { Start-Sleep -Milliseconds 250 }
@@ -181,6 +196,11 @@ foreach ($scenario in @('saved-json', 'saved-csv', 'cancel', 'exists', 'repeated
       $report.dialogControls = @($nodes | ForEach-Object { @{ name=$_.Current.Name; id=$_.Current.AutomationId; type=$_.Current.ControlType.ProgrammaticName; hwnd=$_.Current.NativeWindowHandle } })
     }
   } finally {
+    if (Test-Path $output) { Copy-Item $output (Join-Path $evidence "fixture-$scenario.json") }
+    foreach ($suffix in @('native-log', 'selected')) {
+      $diagnostic = [IO.Path]::ChangeExtension($output, $suffix)
+      if (Test-Path $diagnostic) { Copy-Item $diagnostic (Join-Path $evidence "fixture-$scenario.$suffix") }
+    }
     if ($process) { $process.Refresh(); if (!$process.HasExited) { Stop-Process -Id $process.Id -Force } }
     $results += $report
     $results | ConvertTo-Json -Depth 8 | Set-Content (Join-Path $evidence 'windows-export-runtime.json')

@@ -3,6 +3,18 @@ use std::{path::PathBuf, sync::{Arc, atomic::{AtomicBool, AtomicU64, Ordering}},
 use tauri::{Runtime, Webview};
 use crate::export_policy;
 
+#[cfg(feature = "export-smoke")]
+fn diagnostic(fixture: bool, value: serde_json::Value) {
+    if !fixture { return; }
+    if let Ok(report) = std::env::var("L4A_EXPORT_SMOKE_REPORT") {
+        use std::io::Write;
+        let path = std::path::PathBuf::from(report).with_extension("native-log");
+        if let Ok(mut file) = std::fs::OpenOptions::new().create(true).append(true).open(path) {
+            let _ = writeln!(file, "{}", value);
+        }
+    }
+}
+
 #[derive(Default)]
 pub struct ExportState { pub busy: AtomicBool, pub generation: AtomicU64 }
 fn hosted(url: &tauri::Url) -> bool {
@@ -49,6 +61,8 @@ pub fn requested_fixture<R: Runtime>(view: Webview<R>, url: tauri::Url, state: A
 }
 fn requested_inner<R: Runtime>(view: Webview<R>, url: tauri::Url, state: Arc<ExportState>, fixture: bool) {
     let Ok(origin) = view.url() else { return; };
+    #[cfg(feature = "export-smoke")]
+    diagnostic(fixture, serde_json::json!({"phase":"requested", "origin":origin.as_str(), "url":url.as_str(), "busy":state.busy.load(Ordering::SeqCst)}));
     let mut permitted = hosted(&origin);
     #[cfg(feature = "export-smoke")]
     { permitted |= fixture && ((origin.scheme() == "http" && origin.host_str() == Some("tauri.localhost") && origin.port().is_none()) || (origin.scheme() == "tauri" && origin.host_str() == Some("localhost"))); }
@@ -90,6 +104,8 @@ fn requested_inner<R: Runtime>(view: Webview<R>, url: tauri::Url, state: Arc<Exp
             let (Some(token), Some(filename), Some(text), Some(mime)) = (value["token"].as_str(), value["filename"].as_str(), value["text"].as_str(), value["type"].as_str()) else { return; };
             if token.len() != 36 || !token.chars().all(|c| c.is_ascii_hexdigit() || c == '-') { return; }
             let Ok(ext) = export_policy::validate(filename, text, mime) else { finish(&view, url.as_str(), token, "failed"); return; };
+            #[cfg(feature = "export-smoke")]
+            diagnostic(fixture, serde_json::json!({"phase":"dialog-open", "generation":generation}));
             let status = match choose_path(filename, ext) {
                 Ok(None) => "cancelled",
                 Err(()) => "failed",
@@ -110,7 +126,15 @@ fn requested_inner<R: Runtime>(view: Webview<R>, url: tauri::Url, state: Arc<Exp
                     else if export_policy::save_new_verified(&path, text, ext).is_ok() { "saved" } else { "failed" }
                 }
             };
-            if current(&view, &origin, &state, generation) { finish(&view, url.as_str(), token, status); }
+            #[cfg(feature = "export-smoke")]
+            diagnostic(fixture, serde_json::json!({"phase":"dialog-finished", "status":status,"current":current(&view,&origin,&state,generation),"generation":generation,"nowGeneration":state.generation.load(Ordering::SeqCst),"elapsedMs":requested_at.elapsed().as_millis(),"nowUrl":view.url().ok().map(|u|u.to_string())}));
+            if current(&view, &origin, &state, generation) {
+                finish(&view, url.as_str(), token, status);
+                #[cfg(feature = "export-smoke")]
+                if fixture {
+                    let _ = view.eval_with_callback("window.__L4A_EXPORT_MAILBOX_V1__ !== undefined", move |answer| diagnostic(true, serde_json::json!({"phase":"after-finish-eval", "mailboxPresent":answer})));
+                }
+            }
         });
     });
     if result.is_err() { state.busy.store(false, Ordering::SeqCst); }
