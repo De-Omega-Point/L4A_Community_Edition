@@ -1,3 +1,6 @@
+mod export_policy;
+#[cfg(target_os = "windows")]
+mod windows_export;
 const HOST: &str = "loyalty-for-all-community.sammielee.chatgpt.site";
 const TITLE: &str = "Loyalty4All Community Edition — TEST ONLY";
 
@@ -14,18 +17,39 @@ fn allowed_navigation(url: &tauri::Url) -> bool {
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
-        // No plugins, invoke handlers, remote capabilities or auth shortcuts.
+        // No plugins, invoke handlers, filesystem capabilities or auth shortcuts.
+        // Windows has a bounded, content-only export mailbox; paths stay native.
         .setup(|app| {
-            tauri::WebviewWindowBuilder::new(app, "main", tauri::WebviewUrl::App("index.html".into()))
+            #[cfg(target_os = "windows")]
+            let export_state = std::sync::Arc::new(windows_export::ExportState::default());
+            let builder = tauri::WebviewWindowBuilder::new(app, "main", tauri::WebviewUrl::App("index.html".into()))
                 .title(TITLE)
                 .inner_size(1100.0, 800.0)
                 .devtools(false)
-                .on_navigation(allowed_navigation)
                 .on_new_window(|_, _| tauri::webview::NewWindowResponse::Deny)
-                .on_download(|_, _| false)
                 .on_permission_request(|_, _| tauri::webview::PermissionResponse::Deny)
                 .on_document_title_changed(|window, _| { let _ = window.set_title(TITLE); })
-                .build()?;
+                ;
+            #[cfg(target_os = "windows")]
+            let builder = {
+                let navigation_state = export_state.clone();
+                builder.initialization_script(include_str!("export-mailbox.js"))
+                    .on_navigation(move |url| {
+                        use std::sync::atomic::Ordering;
+                        if navigation_state.busy.load(Ordering::SeqCst) { return false; }
+                        navigation_state.generation.fetch_add(1, Ordering::SeqCst);
+                        allowed_navigation(url)
+                    })
+                    .on_download(move |view, event| {
+                        if let tauri::webview::DownloadEvent::Requested { url, .. } = event {
+                            windows_export::requested(view, url, export_state.clone());
+                        }
+                        false // WebView disk downloads remain denied on EVERY path.
+                    })
+            };
+            #[cfg(not(target_os = "windows"))]
+            let builder = builder.on_navigation(allowed_navigation).on_download(|_, _| false);
+            builder.build()?;
             Ok(())
         })
         .run(tauri::generate_context!())

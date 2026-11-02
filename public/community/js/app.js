@@ -96,11 +96,22 @@ function updateBackupStatus() {
 
 export async function exportData() {
   const { warning } = await waitForPendingChanges();
-  downloadTextFile(backupFilename(), JSON.stringify(serialisableState()), 'application/json');
-  markBackupCreated();
-  updateBackupStatus();
-  toast(warning ? 'Backup downloaded with the last saved records. A recent change failed to save; that change is not included.' : 'Backup downloaded. Keep it somewhere safe.', 'dataNotice', Boolean(warning));
-  return true;
+  const result = await downloadTextFile(backupFilename(), JSON.stringify(serialisableState()), 'application/json');
+  const status = result?.status || 'requested';
+  if (status === 'saved') {
+    markBackupCreated();
+    updateBackupStatus();
+  }
+  const messages = {
+    saved: 'Backup saved and verified. Keep it somewhere safe.',
+    requested: 'Backup download requested. Check the saved file before relying on it; completion cannot be verified in this browser.',
+    cancelled: 'Backup cancelled. No backup was saved.',
+    busy: 'An export is already in progress. Finish or cancel it first.',
+    failed: 'Backup was not saved and verified. An incomplete file may remain. Choose a new filename or another writable location and try again.',
+    unconfirmed: 'Backup could not be confirmed. Check your files; do not rely on this backup until verified.'
+  };
+  toast((messages[status] || messages.unconfirmed) + (warning ? ' A recent change failed to save; that change is not included.' : ''), 'dataNotice', Boolean(warning) || !['saved', 'requested'].includes(status));
+  return status === 'saved';
 }
 
 async function exportCustomersCsv() {
@@ -118,8 +129,17 @@ async function exportCustomersCsv() {
     customer.createdAt || ''
   ]);
   const csv = [header, ...rows].map(row => row.map(csvCell).join(',')).join('\r\n');
-  downloadTextFile('loyalty-4-all-customers.csv', csv, 'text/csv;charset=utf-8');
-  toast(warning ? 'CSV downloaded with the last saved records. A recent change failed to save; that change is not included.' : 'Customer CSV exported.', 'dataNotice', Boolean(warning));
+  const result = await downloadTextFile('loyalty-4-all-customers.csv', csv, 'text/csv;charset=utf-8');
+  const status = result?.status || 'requested';
+  const messages = {
+    saved: 'Customer CSV saved and verified.',
+    requested: 'CSV download requested. Check that the file was saved.',
+    cancelled: 'CSV export cancelled. No file was saved.',
+    busy: 'An export is already in progress. Finish or cancel it first.',
+    failed: 'CSV was not saved and verified. An incomplete file may remain. Choose a new filename or another writable location and try again.',
+    unconfirmed: 'CSV save could not be confirmed. Check your files.'
+  };
+  toast((messages[status] || messages.unconfirmed) + (warning ? ' A recent change failed to save; that change is not included.' : ''), 'dataNotice', Boolean(warning) || !['saved', 'requested'].includes(status));
 }
 
 function importData() {

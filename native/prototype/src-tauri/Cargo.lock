@@ -1644,6 +1644,8 @@ dependencies = [
 name = "l4a-community-prototype"
 version = "0.1.0"
 dependencies = [
+ "serde_json",
+ "windows-sys 0.61.2",
  "tauri",
  "tauri-build",
 ]

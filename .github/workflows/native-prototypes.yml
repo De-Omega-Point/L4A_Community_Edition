@@ -55,6 +55,16 @@ jobs:
         if: runner.os == 'Windows'
         shell: pwsh
         run: ./scripts/smoke-windows.ps1
+      - name: Build separate synthetic Windows export harness (never bundled)
+        if: runner.os == 'Windows'
+        run: cargo build --locked --release --target x86_64-pc-windows-msvc --manifest-path src-tauri/Cargo.toml --features export-smoke --bin l4a-export-smoke
+      - name: Exercise native Save As and verified export outcomes
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: ./scripts/smoke-windows-export.ps1
+      - name: Validate restore of actual synthetic saved backup
+        if: runner.os == 'Windows'
+        run: node scripts/verify-export-restore.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
