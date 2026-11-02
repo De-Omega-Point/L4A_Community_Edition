@@ -1,0 +1,16 @@
+name: Android build (deferred)
+
+# Native/store releases are paused by the owner. The historical shells are
+# retained, but must be reconciled and reviewed before these builds resume.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  android:
+    if: ${{ false }}
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Native builds are deferred. Use the Community web/PWA release."

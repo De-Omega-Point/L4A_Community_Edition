@@ -6,19 +6,23 @@ import test from "node:test";
 const root = resolve(import.meta.dirname, "..");
 const community = resolve(root, "public/community");
 
-test("uses the official Loyalty-4-All identity and assets", () => {
+test("uses the official Community Edition identity and assets", () => {
   const index = readFileSync(resolve(community, "index.html"), "utf8");
   const styles = readFileSync(resolve(community, "css/styles.css"), "utf8");
   const manifest = readFileSync(resolve(community, "manifest.webmanifest"), "utf8");
   const worker = readFileSync(resolve(community, "service-worker.js"), "utf8");
 
   assert.match(index, /Loyalty-4-All/);
+  assert.match(index, /Community · Free forever/);
+  assert.match(index, /Local-first/);
   assert.match(index, /De-Omega-Point Project/);
-  assert.match(styles, /--brand-colour: #10b981/);
-  assert.match(styles, /--accent: #f59e0b/);
-  assert.match(styles, /--info: #3b82f6/);
+  assert.match(index, /Powered locally by <strong>Loyalty4All<\/strong>/);
+  assert.match(index, /id="settingsBrandLogoFile"/);
+  assert.match(index, /The Loyalty-4-All mark stays present/);
+  assert.match(styles, /--brand-colour: #07865f/);
   assert.match(manifest, /"short_name": "L4A"/);
-  assert.match(worker, /loyalty-4-all-community-v5/);
+  assert.match(worker, /loyalty-4-all-community-/);
+  assert.match(worker, /CACHE_PREFIX}v34/);
 
   for (const asset of [
     "assets/loyalty-4-all-logo.png",

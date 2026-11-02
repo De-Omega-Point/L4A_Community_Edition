@@ -1,12 +1,12 @@
 {
   "name": "Loyalty-4-All — Community Edition",
   "short_name": "L4A",
-  "description": "A free, local-first loyalty-first CRM for small businesses. A De-Omega-Point Project.",
+  "description": "Free, local-first customer loyalty for independent businesses. A De-Omega-Point Project.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "background_color": "#f5f9f6",
-  "theme_color": "#10b981",
+  "theme_color": "#07865f",
   "categories": ["business", "productivity"],
   "icons": [
     {

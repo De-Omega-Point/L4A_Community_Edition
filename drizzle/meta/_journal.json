@@ -15,6 +15,20 @@
       "when": 1785425906941,
       "tag": "0001_complex_sprite",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1789878559691,
+      "tag": "0002_wild_demogoblin",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1792291146423,
+      "tag": "0003_yellow_nightshade",
+      "breakpoints": true
     }
   ]
 }
