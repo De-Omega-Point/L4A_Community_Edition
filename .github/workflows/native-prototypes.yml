@@ -3,6 +3,11 @@ on:
   pull_request:
     paths: ['native/prototype/**', '.github/workflows/native-prototypes.yml']
   workflow_dispatch:
+    inputs:
+      windows_only:
+        description: 'Focus a diagnostic rerun on Windows (not a full-platform pass)'
+        type: boolean
+        default: false
 permissions:
   contents: read
 concurrency:
@@ -14,13 +19,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - runner: macos-14
-            target: aarch64-apple-darwin
-            bundle: dmg
-          - runner: windows-2022
-            target: x86_64-pc-windows-msvc
-            bundle: msi
+        include: ${{ fromJSON(inputs.windows_only && '[{"runner":"windows-2022","target":"x86_64-pc-windows-msvc","bundle":"msi"}]' || '[{"runner":"macos-14","target":"aarch64-apple-darwin","bundle":"dmg"},{"runner":"windows-2022","target":"x86_64-pc-windows-msvc","bundle":"msi"}]') }}
     runs-on: ${{ matrix.runner }}
     timeout-minutes: 45
     defaults:
@@ -73,7 +72,7 @@ jobs:
           retention-days: 7
           if-no-files-found: error
   android:
-    if: github.event.repository.private == false
+    if: github.event.repository.private == false && !inputs.windows_only
     runs-on: ubuntu-24.04
     timeout-minutes: 45
     defaults:

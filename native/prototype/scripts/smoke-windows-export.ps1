@@ -21,6 +21,12 @@ public static class ExportDialogControls {
     var read=new StringBuilder(text.Length+10);
     if (SendMessageTimeout(h,0x000D,(IntPtr)read.Capacity,read,2,3000,out result)==IntPtr.Zero || read.ToString()!=text) throw new Exception("Native filename readback differs");
   }
+  public static string ReadFileName(IntPtr h) {
+    if (h == IntPtr.Zero || !Class(h).Equals("Edit",StringComparison.OrdinalIgnoreCase)) throw new Exception("Filename HWND is not an Edit control");
+    var read=new StringBuilder(32768); IntPtr result;
+    if (SendMessageTimeout(h,0x000D,(IntPtr)read.Capacity,read,2,3000,out result)==IntPtr.Zero) throw new Exception("Native filename read failed");
+    return read.ToString();
+  }
   public static void Click(IntPtr h) {
     if (h == IntPtr.Zero || !Class(h).Equals("Button",StringComparison.OrdinalIgnoreCase)) throw new Exception("Save/Cancel HWND is not a Button control");
     if (!PostMessage(h,0x00F5,IntPtr.Zero,IntPtr.Zero)) throw new Exception("Native button click failed");
@@ -48,11 +54,25 @@ function Set-DialogFileName($dialog, $destination) {
   $fieldCondition = [System.Windows.Automation.PropertyCondition]::new([System.Windows.Automation.AutomationElement]::AutomationIdProperty, '1001')
   $edit = $hostNode.FindFirst([System.Windows.Automation.TreeScope]::Descendants, $fieldCondition)
   if (!$edit) { throw 'Native filename control not discoverable inside filename host' }
-  $pattern = $null
-  if ($edit.TryGetCurrentPattern([System.Windows.Automation.ValuePattern]::Pattern, [ref]$pattern)) {
-    $pattern.SetValue($destination)
-    if ($pattern.Current.Value -cne $destination) { throw 'UIA filename readback differs' }
-  } else { [ExportDialogControls]::SetFileName([IntPtr]$edit.Current.NativeWindowHandle, $destination) }
+  # Real keyboard input is required: WM_SETTEXT/UIA ValuePattern can change
+  # visible text without committing the shell dialog's internal filename model.
+  $keyboard = New-Object -ComObject WScript.Shell
+  if (!$keyboard.AppActivate($dialog.Current.Name)) { throw 'Could not activate the verified native Save As dialog' }
+  Start-Sleep -Milliseconds 250
+  $keyboard.SendKeys('%n')
+  Start-Sleep -Milliseconds 250
+  $keyboard.SendKeys('^a')
+  $escaped = -join ($destination.ToCharArray() | ForEach-Object {
+    switch ($_) {
+      '{' { '{{}' } '}' { '{}}' }
+      default { if ('+^%~()'.Contains([string]$_)) { '{' + $_ + '}' } else { [string]$_ } }
+    }
+  })
+  $keyboard.SendKeys($escaped)
+  $keyboard.SendKeys('{TAB}')
+  Start-Sleep -Milliseconds 350
+  if ([ExportDialogControls]::ReadFileName([IntPtr]$edit.Current.NativeWindowHandle) -cne $destination) { throw 'Keyboard filename readback differs from chosen destination' }
+
 }
 $exe = Resolve-Path 'src-tauri/target/x86_64-pc-windows-msvc/release/l4a-export-smoke.exe'
 $root = Join-Path $env:RUNNER_TEMP ('l4a-export-smoke-' + [Guid]::NewGuid().ToString('N'))
@@ -101,7 +121,7 @@ foreach ($scenario in @('saved-json', 'saved-csv', 'cancel', 'exists', 'repeated
         Invoke-DialogButton $cancel
         Start-Sleep -Seconds 1
         $dialog = $null
-        $expiry = (Get-Date).AddSeconds(20)
+        $expiry = (Get-Date).AddSeconds(90)
         while (!$dialog -and (Get-Date) -lt $expiry) {
           $windows = [System.Windows.Automation.AutomationElement]::RootElement.FindAll([System.Windows.Automation.TreeScope]::Children, $condition)
           foreach ($window in $windows) {
@@ -127,6 +147,13 @@ foreach ($scenario in @('saved-json', 'saved-csv', 'cancel', 'exists', 'repeated
     if ($result.error) { throw $result.error }
     $expected = switch ($scenario) { 'cancel' {'cancelled'} 'exists' {'failed'} 'invalid' {'failed'} 'oversized' {'failed'} default {'saved'} }
     if ($result.status -ne $expected) { throw "Expected $expected, got $($result.status)" }
+    if ($expected -eq 'saved' -or $scenario -eq 'exists') {
+      $selectedReport = [IO.Path]::ChangeExtension($output, 'selected')
+      if (!(Test-Path $selectedReport)) { throw 'Test-only native selected-path evidence missing' }
+      $selectedPath = [IO.File]::ReadAllText($selectedReport)
+      $report.nativeSelectedPath = $selectedPath
+      if ([IO.Path]::GetFullPath($selectedPath) -ine [IO.Path]::GetFullPath($destination)) { throw 'Native dialog selected a different destination than requested through its UI' }
+    }
     $report.status = $result.status
     if ($result.firstElapsedMs) { $report.firstElapsedMs = $result.firstElapsedMs }
     if ($scenario -eq 'timeout-retry' -and ($result.firstStatus -ne 'unconfirmed' -or $result.secondStatus -ne 'busy')) { throw 'Timeout/retry contract failed' }
@@ -147,6 +174,8 @@ foreach ($scenario in @('saved-json', 'saved-csv', 'cancel', 'exists', 'repeated
     $failed = $true
     $report.passed = $false
     $report.error = $_.Exception.Message
+    $selectedReport = [IO.Path]::ChangeExtension($output, 'selected')
+    if (Test-Path $selectedReport) { $report.nativeSelectedPath = [IO.File]::ReadAllText($selectedReport) }
     if ($dialog) {
       $nodes = $dialog.FindAll([System.Windows.Automation.TreeScope]::Descendants, [System.Windows.Automation.Condition]::TrueCondition)
       $report.dialogControls = @($nodes | ForEach-Object { @{ name=$_.Current.Name; id=$_.Current.AutomationId; type=$_.Current.ControlType.ProgrammaticName; hwnd=$_.Current.NativeWindowHandle } })

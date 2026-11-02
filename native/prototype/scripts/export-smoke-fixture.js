@@ -26,8 +26,14 @@ addEventListener('DOMContentLoaded', () => setTimeout(async () => {
       document.title = "L4A_EXPORT_STAGE:first-timeout";
       report.secondStatus = (await mailbox.save(name, text, type)).status;
       document.title = 'L4A_EXPORT_STAGE:timeout-busy';
-      await new Promise(resolve => setTimeout(resolve, 3000));
-      report.status = (await mailbox.save(name, text, type)).status;
+      // The harness cancels the expired dialog after the stage marker. Wait
+      // for actual native release rather than assuming a scheduler deadline.
+      report.retryAttempts = 0;
+      do {
+        await new Promise(resolve => setTimeout(resolve, 500));
+        report.retryAttempts++;
+        report.status = (await mailbox.save(name, text, type)).status;
+      } while (report.status === 'busy' && report.retryAttempts < 30);
     } else report.status = (await first).status;
     report.expectedText = text.length < 4096 ? text : null;
   } catch (error) { report.error = String(error); }

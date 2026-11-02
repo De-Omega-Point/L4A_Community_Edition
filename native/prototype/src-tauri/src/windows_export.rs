@@ -94,6 +94,18 @@ fn requested_inner<R: Runtime>(view: Webview<R>, url: tauri::Url, state: Arc<Exp
                 Ok(None) => "cancelled",
                 Err(()) => "failed",
                 Ok(Some(path)) => {
+                    #[cfg(feature = "export-smoke")]
+                    if fixture {
+                        // Synthetic harness diagnostic only; never sent to the page
+                        // and not compiled into the ordinary MSI.
+                        if let Ok(report) = std::env::var("L4A_EXPORT_SMOKE_REPORT") {
+                            use std::io::Write;
+                            let output = std::path::PathBuf::from(report).with_extension("selected");
+                            if let Ok(mut file) = std::fs::OpenOptions::new().write(true).create_new(true).open(output) {
+                                let _ = file.write_all(path.to_string_lossy().as_bytes());
+                            }
+                        }
+                    }
                     if !current(&view, &origin, &state, generation) || requested_at.elapsed() > Duration::from_secs(110) { "unconfirmed" }
                     else if export_policy::save_new_verified(&path, text, ext).is_ok() { "saved" } else { "failed" }
                 }
