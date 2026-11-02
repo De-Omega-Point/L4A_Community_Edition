@@ -132,6 +132,25 @@ foreach ($scenario in @('saved-json', 'saved-csv', 'cancel', 'exists', 'repeated
         $cancel = Find-DialogButton $dialog 'Cancel' '2'
         Invoke-DialogButton $cancel $dialog
         Start-Sleep -Seconds 1
+        # Retry must be a fresh real user gesture. Do not relax WebView2's
+        # automatic-download permission or trigger the second export via timers.
+        $retryCondition = [System.Windows.Automation.PropertyCondition]::new([System.Windows.Automation.AutomationElement]::NameProperty, 'Retry synthetic export')
+        $retry = $null
+        $retryDeadline = (Get-Date).AddSeconds(20)
+        while (!$retry -and (Get-Date) -lt $retryDeadline) {
+          $windows = [System.Windows.Automation.AutomationElement]::RootElement.FindAll([System.Windows.Automation.TreeScope]::Children, $condition)
+          foreach ($window in $windows) {
+            $retry = $window.FindFirst([System.Windows.Automation.TreeScope]::Descendants, $retryCondition)
+            if ($retry) { break }
+          }
+          if (!$retry) { Start-Sleep -Milliseconds 250 }
+        }
+        if (!$retry) { throw 'Retry button not available through native browser accessibility' }
+        $keyboard = New-Object -ComObject WScript.Shell
+        if (!$keyboard.AppActivate([int]$process.Id)) { throw 'Cannot activate synthetic app for customer retry' }
+        $retry.SetFocus()
+        Start-Sleep -Milliseconds 250
+        $keyboard.SendKeys(' ')
         $dialog = $null
         $expiry = (Get-Date).AddSeconds(90)
         while (!$dialog -and (Get-Date) -lt $expiry) {
@@ -171,7 +190,7 @@ foreach ($scenario in @('saved-json', 'saved-csv', 'cancel', 'exists', 'repeated
     }
     $report.status = $result.status
     if ($result.firstElapsedMs) { $report.firstElapsedMs = $result.firstElapsedMs }
-    if ($scenario -eq 'timeout-retry' -and ($result.firstStatus -ne 'unconfirmed' -or $result.secondStatus -ne 'busy')) { throw 'Timeout/retry contract failed' }
+    if ($scenario -eq 'timeout-retry' -and ($result.firstStatus -ne 'unconfirmed' -or $result.secondStatus -ne 'busy' -or !$result.retryTrusted -or !$result.retryUserActivation)) { throw 'Timeout/retry contract or real user gesture failed' }
     if ($scenario -eq 'busy-navigation' -and !$result.navigationBlocked) { throw 'Navigation was not blocked while native save was busy' }
     if ($scenario -eq 'repeated' -and $result.secondStatus -ne 'busy') { throw 'Repeated concurrent export was not rejected as busy' }
     if ($expected -eq 'saved') {

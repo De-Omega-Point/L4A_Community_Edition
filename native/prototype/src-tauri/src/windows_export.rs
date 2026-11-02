@@ -28,6 +28,10 @@ fn finish<R: Runtime>(view: &Webview<R>, url: &str, token: &str, status: &str) {
     let args = serde_json::json!([url, token, status]);
     let _ = view.eval(format!("window.__L4A_EXPORT_MAILBOX_V1__?.complete(...{args});"));
 }
+fn abort<R: Runtime>(view: &Webview<R>, url: &str) {
+    let arg = serde_json::to_string(url).unwrap();
+    let _ = view.eval(format!("window.__L4A_EXPORT_MAILBOX_V1__?.abort({arg});"));
+}
 fn choose_path(filename: &str, extension: &str) -> Result<Option<PathBuf>, ()> {
     use windows_sys::Win32::UI::Controls::Dialogs::*;
     let mut file = vec![0u16; 32768];
@@ -87,6 +91,7 @@ fn requested_inner<R: Runtime>(view: Webview<R>, url: tauri::Url, state: Arc<Exp
     let requested_at = Instant::now();
     let args = serde_json::to_string(url.as_str()).unwrap();
     let script = format!("window.__L4A_EXPORT_MAILBOX_V1__?.take({args}) ?? null");
+    let timeout_view = view.clone(); let timeout_url = url.clone();
     let callback_view = view.clone();
     let callback_state = state.clone();
     let called = Arc::new(AtomicBool::new(false));
@@ -97,12 +102,12 @@ fn requested_inner<R: Runtime>(view: Webview<R>, url: tauri::Url, state: Arc<Exp
         std::thread::spawn(move || {
             struct Release(Arc<ExportState>); impl Drop for Release { fn drop(&mut self) { self.0.busy.store(false, Ordering::SeqCst); } }
             let _release = Release(state.clone());
-            if !current(&view, &origin, &state, generation) || requested_at.elapsed() > Duration::from_secs(110) { return; }
+            if !current(&view, &origin, &state, generation) || requested_at.elapsed() > Duration::from_secs(110) { abort(&view, url.as_str()); return; }
             // JSON escaping may expand the 20 MB text transport by up to six times.
-            if response.len() > export_policy::MAX_BYTES * 6 + 4096 { return; }
-            let Ok(value) = serde_json::from_str::<serde_json::Value>(&response) else { return; };
-            let (Some(token), Some(filename), Some(text), Some(mime)) = (value["token"].as_str(), value["filename"].as_str(), value["text"].as_str(), value["type"].as_str()) else { return; };
-            if token.len() != 36 || !token.chars().all(|c| c.is_ascii_hexdigit() || c == '-') { return; }
+            if response.len() > export_policy::MAX_BYTES * 6 + 4096 { abort(&view, url.as_str()); return; }
+            let Ok(value) = serde_json::from_str::<serde_json::Value>(&response) else { abort(&view, url.as_str()); return; };
+            let (Some(token), Some(filename), Some(text), Some(mime)) = (value["token"].as_str(), value["filename"].as_str(), value["text"].as_str(), value["type"].as_str()) else { abort(&view, url.as_str()); return; };
+            if token.len() != 36 || !token.chars().all(|c| c.is_ascii_hexdigit() || c == '-') { abort(&view, url.as_str()); return; }
             let Ok(ext) = export_policy::validate(filename, text, mime) else { finish(&view, url.as_str(), token, "failed"); return; };
             #[cfg(feature = "export-smoke")]
             diagnostic(fixture, serde_json::json!({"phase":"dialog-open", "generation":generation}));
@@ -137,11 +142,11 @@ fn requested_inner<R: Runtime>(view: Webview<R>, url: tauri::Url, state: Arc<Exp
             }
         });
     });
-    if result.is_err() { state.busy.store(false, Ordering::SeqCst); }
+    if result.is_err() && !called.swap(true, Ordering::SeqCst) { state.busy.store(false, Ordering::SeqCst); abort(&timeout_view, timeout_url.as_str()); }
     // A never-delivered evaluation cannot keep navigation locked forever. No OS
     // dialog or file write has started if the callback has not arrived.
     std::thread::spawn(move || {
         std::thread::sleep(Duration::from_secs(115));
-        if !called.swap(true, Ordering::SeqCst) { state.busy.store(false, Ordering::SeqCst); }
+        if !called.swap(true, Ordering::SeqCst) { state.busy.store(false, Ordering::SeqCst); abort(&timeout_view, timeout_url.as_str()); }
     });
 }

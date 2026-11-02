@@ -64,3 +64,15 @@ test('an open native dialog stays single-flight after timeout until it is closed
   const nextData = api.take(clicked[1]); api.complete(clicked[1], nextData.token, 'saved');
   assert.equal((await next).status, 'saved');
 });
+
+test('native no-callback or late-callback abort releases only its exact request', async () => {
+  const { api, clicked } = setup();
+  const abandoned = api.save('backup.json', '{}', 'application/json');
+  api.take(clicked[0]); api.abort(clicked[0]);
+  assert.equal((await abandoned).status, 'unconfirmed');
+  const retry = api.save('backup.json', '{}', 'application/json');
+  api.abort(clicked[0]); // stale native watchdog cannot cancel a newer request
+  assert.equal((await api.save('backup.json', '{}', 'application/json')).status, 'busy');
+  const data = api.take(clicked[1]); api.complete(clicked[1], data.token, 'saved');
+  assert.equal((await retry).status, 'saved');
+});

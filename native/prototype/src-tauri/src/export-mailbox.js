@@ -36,6 +36,9 @@
       pending.text = ''; // do not retain a second payload while native confirmation is open
       return { token, filename, text, type };
     },
+    abort(url) {
+      if (pending?.url === url) api.complete(url, pending.token, 'unconfirmed');
+    },
     complete(url, token, status) {
       if (!pending || pending.url !== url || pending.token !== token) return;
       const done = pending; pending = null;

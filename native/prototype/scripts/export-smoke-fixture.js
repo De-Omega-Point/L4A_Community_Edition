@@ -26,14 +26,23 @@ addEventListener('DOMContentLoaded', () => setTimeout(async () => {
       document.title = "L4A_EXPORT_STAGE:first-timeout";
       report.secondStatus = (await mailbox.save(name, text, type)).status;
       document.title = 'L4A_EXPORT_STAGE:timeout-busy';
-      // The harness cancels the expired dialog after the stage marker. Wait
-      // for actual native release rather than assuming a scheduler deadline.
+      // A retry is a new customer action, not an automatic second download.
+      // Keep the normal browser permission boundary and model a fresh user gesture.
+      const retry = document.createElement('button');
+      retry.type = 'button'; retry.id = 'l4a-smoke-retry';
+      retry.textContent = 'Retry synthetic export';
+      retry.style.cssText = 'position:fixed;top:20px;left:20px;z-index:99999;font-size:24px;padding:20px';
+      document.body.append(retry);
       report.retryAttempts = 0;
-      do {
-        await new Promise(resolve => setTimeout(resolve, 500));
+      report.status = await new Promise(resolve => retry.addEventListener('click', async event => {
+        report.retryTrusted = event.isTrusted;
+        report.retryUserActivation = navigator.userActivation?.isActive ?? null;
         report.retryAttempts++;
-        report.status = (await mailbox.save(name, text, type)).status;
-      } while (report.status === 'busy' && report.retryAttempts < 30);
+        retry.disabled = true;
+        const result = await mailbox.save(name, text, type);
+        if (result.status === 'busy') { retry.disabled = false; return; }
+        resolve(result.status);
+      }));
     } else report.status = (await first).status;
     report.expectedText = text.length < 4096 ? text : null;
   } catch (error) { report.error = String(error); }

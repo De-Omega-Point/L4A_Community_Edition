@@ -30,3 +30,9 @@ test('hosted target stays HTTPS and exact-host checked; no updater', () => {
   assert.match(rust, /url\.port_or_known_default\(\) == Some\(443\)/);
   assert.equal(config.bundle.createUpdaterArtifacts, false);
 });
+
+test('evaluation error retires its watchdog before releasing native busy state', () => {
+  const windows = readFileSync(new URL('../src-tauri/src/windows_export.rs', import.meta.url), 'utf8');
+  assert.match(windows, /if result\.is_err\(\) && !called\.swap\(true, Ordering::SeqCst\)/);
+  assert.match(windows, /if !called\.swap\(true, Ordering::SeqCst\) \{ state\.busy\.store\(false, Ordering::SeqCst\); abort\(&timeout_view, timeout_url\.as_str\(\)\)/);
+});
