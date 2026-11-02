@@ -44,6 +44,6 @@ test("legacy membership module and database records are retained while its write
 test("offline shell preserves the legacy membership module without exposing its form", () => {
   const worker = readFileSync(resolve(community, "service-worker.js"), "utf8");
   assert.match(worker, /loyalty-4-all-community-/);
-  assert.match(worker, /CACHE_PREFIX}v31/);
+  assert.match(worker, /CACHE_PREFIX}v32/);
   assert.match(worker, /\.\/js\/membership\.js/);
 });

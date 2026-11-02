@@ -6,7 +6,7 @@ export const storageKeys = {
   data: 'loyalty4all.data.v5', legacyData: 'loyalty4all.data.v4', olderLegacyData: 'loyalty4all.data.v3',
   branding: 'loyalty4all.branding.v5', legacyBranding: 'loyalty4all.branding.v4', olderLegacyBranding: 'loyalty4all.branding.v3',
   legacyRegistration: 'loyalty4all.registration.v1', communityMembership: 'loyalty4all.community-membership.v1',
-  backupMeta: 'loyalty4all.backup-meta.v1', demoBackup: 'loyalty4all.demo-backup.v1'
+  backupMeta: 'loyalty4all.backup-meta.v1', verifiedBackupMeta: 'loyalty4all.backup-verified.v1', demoBackup: 'loyalty4all.demo-backup.v1'
 };
 export const appState = {
   customers: [], activity: [], currentCustomerId: null, selectedCrmCustomerId: null,
@@ -231,9 +231,10 @@ export function pendingSurpriseReward(customer) { return customer?.surpriseRewar
 export function rewardReady(customer) { return Boolean(standardRewardReady(customer) || pendingSurpriseReward(customer)); }
 export function markBackupCreated() {
   const timestamp = nowIso();
-  try { localStorage.setItem(storageKeys.backupMeta, timestamp); } catch { return ''; }
+  try { localStorage.setItem(storageKeys.backupMeta, timestamp); localStorage.setItem(storageKeys.verifiedBackupMeta, timestamp); } catch { return ''; }
   return timestamp;
 }
+export function lastBackupWasVerified() { try { const value = lastBackupAt(); return Boolean(value) && localStorage.getItem(storageKeys.verifiedBackupMeta) === value; } catch { return false; } }
 export function lastBackupAt() { try { return localStorage.getItem(storageKeys.backupMeta) || ''; } catch { return ''; } }
 export function loadDemoData() {
   return updateState(draft => {

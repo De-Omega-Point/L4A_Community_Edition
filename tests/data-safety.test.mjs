@@ -393,3 +393,28 @@ test('a pending deletion does not erase a newer new-customer draft', async () =>
   await pending;
   assert.equal(element('crmName').value, 'Newer draft'); assert.equal(appState.selectedCrmCustomerId, null);
 });
+
+test('backup records completion only for native verified saved, never cancel/failure/browser request', async () => {
+  const source = readFileSync(new URL('../public/community/js/app.js', import.meta.url), 'utf8');
+  const code = source.slice(source.indexOf('export async function exportData'), source.indexOf('async function exportCustomersCsv')).replace('export async function', 'async function');
+  for (const status of ['cancelled', 'failed', 'unconfirmed', 'busy', 'requested', 'saved']) {
+    let marks = 0; const notices = [];
+    const sandbox = { waitForPendingChanges: async () => ({ warning: '' }), serialisableState: () => ({}), backupFilename: () => 'synthetic.json', downloadTextFile: async () => ({ status }), markBackupCreated() { marks++; }, updateBackupStatus() {}, toast: message => notices.push(message) };
+    vm.createContext(sandbox); vm.runInContext(code, sandbox);
+    assert.equal(await sandbox.exportData(), status === 'saved');
+    assert.equal(marks, status === 'saved' ? 1 : 0);
+    assert.doesNotMatch(notices[0], /Backup downloaded/);
+  }
+});
+
+
+test('legacy backup timestamps remain unverified until a confirmed native save', async () => {
+  await setup();
+  localStorage.setItem(state.storageKeys.backupMeta, '2026-01-01T00:00:00.000Z');
+  assert.equal(state.lastBackupWasVerified(), false);
+  const savedAt = state.markBackupCreated();
+  assert.equal(state.lastBackupAt(), savedAt);
+  assert.equal(state.lastBackupWasVerified(), true);
+  localStorage.setItem(state.storageKeys.backupMeta, '2026-02-01T00:00:00.000Z');
+  assert.equal(state.lastBackupWasVerified(), false);
+});

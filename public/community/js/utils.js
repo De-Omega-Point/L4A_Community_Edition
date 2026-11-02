@@ -23,14 +23,18 @@ export function todayYmd() {
   return `${year}-${month}-${day}`;
 }
 
-export function downloadTextFile(filename, text, type = 'text/plain') {
+export async function downloadTextFile(filename, text, type = 'text/plain') {
+  if (window.__L4A_EXPORT_MAILBOX_V1__) {
+    return window.__L4A_EXPORT_MAILBOX_V1__.save(filename, text, type);
+  }
   const blob = new Blob([text], { type });
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.href = url;
   link.download = filename;
   link.click();
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  setTimeout(() => URL.revokeObjectURL(url), 60000);
+  return { status: 'requested' }; // Browsers do not report completed download bytes.
 }
 
 // Spreadsheet applications can ignore leading whitespace/control characters before formulas.
