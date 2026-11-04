@@ -15,6 +15,8 @@ test('renders the public product page with the single registration entry and no 
   assert.equal(response.status, 200);
   assert.match(response.headers.get('content-type') ?? '', /^text\/html\b/i);
   const html = await response.text();
+  assert.doesNotMatch(html, /(?:href|src)=["'][^"']*\/\.vinext\/fonts\//);
+  assert.doesNotMatch(html, /<link\b[^>]*as="font"/);
   assert.doesNotMatch(html, developmentPreviewMeta);
   assert.match(html, /Loyalty-4-All/);
   assert.match(html, /Start using Loyalty4All/);

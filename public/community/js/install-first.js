@@ -163,6 +163,9 @@ export function mountInstallFirst({ hasExistingRecords, storageWarning = '', exp
     unlock();
   });
   retry.addEventListener('click', check);
+  // A restored page may have an outdated receipt result. Recheck only locked
+  // setup, preserving active work and avoiding a second initial-load check.
+  target.addEventListener('pageshow', event => { if (event.persisted && !accessGranted) void check(); });
   // Never interrupt a merchant's active local work when connectivity changes.
   target.addEventListener('online', () => { if (!accessGranted) void check(); });
   target.addEventListener('offline', () => {

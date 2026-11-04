@@ -59,3 +59,30 @@ test('complete cached files with blocked setup storage never promises offline re
  assert.match(nodes.installedUseStatus.textContent,/Offline restart cannot be confirmed/);
  assert.match(nodes.installedUseStatus.textContent,/storage is restricted/);
 });
+test('BFCache return rechecks locked setup but neither initial pageshow nor unlocked work', async () => {
+ const names=['installFirst','customerTools','mainNav','installFirstTitle','installFirstMessage','offlineReadiness','btnConfirmSetup','btnLegacyWorkspace','installedRegistrationLink','installedUseStatus','btnInstallFirst','btnSetupBackup','setupStorageWarning','btnUsePreparedWorkspace'];
+ const nodes=Object.fromEntries(names.map(n=>[n,Object.assign(new EventTarget(),{hidden:false,inert:false,textContent:'',disabled:false})]));
+ const target=Object.assign(new EventTarget(),{matchMedia:()=>({matches:true}),navigator:{onLine:true}});
+ let reads=0; let state='unlinked';
+ const tick=()=>new Promise(resolve=>setImmediate(resolve));
+ const pageshow=persisted=>{const event=new Event('pageshow');Object.defineProperty(event,'persisted',{value:persisted});target.dispatchEvent(event);};
+ mountInstallFirst({hasExistingRecords:false,exportBackup:()=>{},exportCsv:()=>{},install:()=>{},doc:{getElementById:n=>nodes[n]},target,read:async()=>{reads++;return {state};},shellReady:async()=>true,storage:{getItem:()=>null,setItem:()=>{}}});
+ await tick(); assert.equal(reads,1); assert.equal(nodes.customerTools.hidden,true);
+ pageshow(false); await tick(); assert.equal(reads,1);
+ pageshow(true); await tick(); assert.equal(reads,2); assert.equal(nodes.customerTools.hidden,true);
+ state='verified'; pageshow(true); await tick(); assert.equal(reads,3); assert.equal(nodes.customerTools.hidden,false);
+ state='unlinked'; pageshow(true); await tick(); assert.equal(reads,3); assert.equal(nodes.customerTools.hidden,false);
+});
+test('BFCache recheck aborts an older check and ignores its late verified receipt', async () => {
+ const names=['installFirst','customerTools','mainNav','installFirstTitle','installFirstMessage','offlineReadiness','btnConfirmSetup','btnLegacyWorkspace','installedRegistrationLink','installedUseStatus','btnInstallFirst','btnSetupBackup','setupStorageWarning','btnUsePreparedWorkspace'];
+ const nodes=Object.fromEntries(names.map(n=>[n,Object.assign(new EventTarget(),{hidden:false,inert:false,textContent:'',disabled:false})]));
+ const target=Object.assign(new EventTarget(),{matchMedia:()=>({matches:true}),navigator:{onLine:true}});
+ const requests=[];const tick=()=>new Promise(resolve=>setImmediate(resolve));
+ mountInstallFirst({hasExistingRecords:false,exportBackup:()=>{},exportCsv:()=>{},install:()=>{},doc:{getElementById:n=>nodes[n]},target,read:({signal})=>new Promise(resolve=>requests.push({signal,resolve})),shellReady:async()=>true,storage:{getItem:()=>null,setItem:()=>{}}});
+ const event=new Event('pageshow');Object.defineProperty(event,'persisted',{value:true});target.dispatchEvent(event);
+ assert.equal(requests.length,2);assert.equal(requests[0].signal.aborted,true);
+ requests[1].resolve({state:'unlinked'});await tick();
+ requests[0].resolve({state:'verified'});await tick();
+ assert.equal(nodes.customerTools.hidden,true);assert.equal(nodes.btnConfirmSetup.disabled,false);
+ assert.match(nodes.installFirstTitle.textContent,/Registration is not linked/);
+});

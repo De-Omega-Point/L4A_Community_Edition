@@ -7,7 +7,7 @@ import { resolve } from 'node:path';
 const source = readFileSync('public/community/service-worker.js', 'utf8');
 const origin = 'https://example.test';
 const base = `${origin}/community/service-worker.js`;
-const current = 'loyalty-4-all-community-v34';
+const current = 'loyalty-4-all-community-v35';
 
 function worker({ failInstall = false, networkFails = false } = {}) {
   const listeners = new Map();

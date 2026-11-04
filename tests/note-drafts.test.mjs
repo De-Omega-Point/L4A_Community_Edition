@@ -215,5 +215,5 @@ test('note ownership help is accessible and the versioned offline shell includes
     assert.match(html, new RegExp(`id="${input}Help"[^>]*>Select a customer before writing a note\\. Unsaved notes clear when you change customers\\.`));
   }
   const worker = readFileSync('public/community/service-worker.js', 'utf8');
-  assert.match(worker, /CACHE_PREFIX}v34/); assert.match(worker, /'\.\/js\/note-drafts\.js'/);
+  assert.match(worker, /CACHE_PREFIX}v35/); assert.match(worker, /'\.\/js\/note-drafts\.js'/);
 });

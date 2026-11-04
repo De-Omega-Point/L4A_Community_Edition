@@ -22,7 +22,7 @@ test("uses the official Community Edition identity and assets", () => {
   assert.match(styles, /--brand-colour: #07865f/);
   assert.match(manifest, /"short_name": "L4A"/);
   assert.match(worker, /loyalty-4-all-community-/);
-  assert.match(worker, /CACHE_PREFIX}v34/);
+  assert.match(worker, /CACHE_PREFIX}v35/);
 
   for (const asset of [
     "assets/loyalty-4-all-logo.png",
